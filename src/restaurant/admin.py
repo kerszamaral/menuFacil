@@ -1,8 +1,10 @@
+from typing import Any
 from django.contrib import admin
+from django.http.request import HttpRequest
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from guardian.admin import GuardedModelAdmin
-from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import get_objects_for_user
 
 from .models import Restaurant, Menu, Food
 
@@ -14,6 +16,44 @@ class EditLinkToInlineObject(object):
             return mark_safe(u'<a href="{u}">edit</a>'.format(u=url))
         else:
             return ''
+
+class PermissionCheckModelAdmin(GuardedModelAdmin):
+    def has_module_permission(self, request: HttpRequest) -> bool:
+        if super().has_module_permission(request):
+            return True
+        return self.get_model_objects(request).exists()
+
+    def get_queryset(self, request):
+        if request.user.is_superuser:
+            return super().get_queryset(request)
+        data = self.get_model_objects(request)
+        return data
+
+    def get_model_objects(self, request: HttpRequest, action=None, klass=None):
+        opts = self.opts
+        actions = [action] if action else ['view', 'add', 'change', 'delete']
+        klass = klass or opts.model
+        model_name = klass._meta.model_name
+        return get_objects_for_user(user=request.user, 
+                                    perms=[f'{perm}_{model_name}' for perm in actions], 
+                                    klass=klass, any_perm=True)
+
+    def has_permission(self, request: HttpRequest, obj, action) -> bool:
+        opts = self.opts
+        code_name = f'{action}_{opts.model_name}'
+        if obj:
+            return request.user.has_perm(f'{opts.app_label}.{code_name}', obj)
+        else:
+            return self.get_model_objects(request).exists()
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request, obj, 'view')
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request, obj, 'change')
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_permission(request, obj, 'delete')
 
 # Register your models here.
 class FoodInline(admin.TabularInline):
@@ -28,6 +68,7 @@ class MenuAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
     def has_module_permission(self, request):
+        # Hide the model from admin index
         return False
 
 class MenuInline(admin.TabularInline, EditLinkToInlineObject):
@@ -36,19 +77,8 @@ class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     readonly_fields = ('edit_link',)
 
 @admin.register(Restaurant)
-class RestaurantAdmin(GuardedModelAdmin):
+class RestaurantAdmin(PermissionCheckModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo']}),
     ]
     inlines = [MenuInline]
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-
-        for restaurant in qs:
-            if not request.user.has_perm('restaurant.view_restaurant', restaurant):
-                qs = qs.exclude(pk=restaurant.pk)
-
-        return qs
