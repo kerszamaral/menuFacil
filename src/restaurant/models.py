@@ -31,7 +31,8 @@ class Food(models.Model):
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=5, decimal_places=2,
                 default=Decimal("1.99"), # Decimal needs to be a string or it will have imprecision
-                validators=[MinValueValidator(Decimal("0.00"))]) 
+                validators=[MinValueValidator(Decimal("0.00"))])
+    description = models.TextField(blank=True)
     photo = models.ImageField(upload_to='restaurant/food_photos', blank=True)
     hidden = models.BooleanField(default=False)
 
