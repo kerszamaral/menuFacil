@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from guardian.admin import GuardedModelAdmin
+from guardian.core import ObjectPermissionChecker
 
 from .models import Restaurant, Menu, Food
 
@@ -34,8 +36,19 @@ class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     readonly_fields = ('edit_link',)
 
 @admin.register(Restaurant)
-class RestaurantAdmin(admin.ModelAdmin):
+class RestaurantAdmin(GuardedModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo']}),
     ]
     inlines = [MenuInline]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+
+        for restaurant in qs:
+            if not request.user.has_perm('restaurant.view_restaurant', restaurant):
+                qs = qs.exclude(pk=restaurant.pk)
+
+        return qs
