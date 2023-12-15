@@ -5,8 +5,13 @@
 {% if restaurant_list %}
     <ul>
     {% for restaurant in restaurant_list %}
-        <li><a href="{% url 'restaurant:detail' restaurant.id %}">{{ restaurant.name }}</a></li>
-        {% comment %} <li><a>{{ restaurant.name }}</a></li> {% endcomment %}
+        <li>
+            <a href={% url 'restaurant:detail' restaurant.id %}>
+                <img src="{{ restaurant.logo.url }}" alt="{{ restaurant.name }}" href={% url 'restaurant:detail' restaurant.id %} width="300" height="200">
+                <br>
+                {{ restaurant.name }}
+            </a>
+        </li>
     {% endfor %}
     </ul>
 {% else %}

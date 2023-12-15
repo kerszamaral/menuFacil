@@ -18,25 +18,24 @@ class FoodInline(admin.TabularInline):
     model = Food
     extra = 1
 
+@admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ['restaurant', 'name']}),
-    ]
     inlines = [FoodInline]
     list_display = ('restaurant', 'name')
     list_filter = ['restaurant']
     search_fields = ['name']
+
+    def has_module_permission(self, request):
+        return False
 
 class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     model = Menu
     extra = 0
     readonly_fields = ('edit_link',)
 
+@admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['name', 'address', 'phone']}),
+        (None, {'fields': ['name', 'address', 'phone', 'logo']}),
     ]
     inlines = [MenuInline]
-
-admin.site.register(Menu, MenuAdmin)
-admin.site.register(Restaurant, RestaurantAdmin)
