@@ -1,0 +1,12 @@
+{% load static %}
+
+{% block content %}
+    <h1>{{ restaurant.name }}</h1>
+    <p>Welcome to our menus</p>
+    {% for menu in restaurant.menu_set.all %}
+        <h2> {{ menu.name }} </h2>
+        {% for food in menu.food_set.all %}
+            <p> {{ food.name }} - {{ food.price }} </p>
+        {% endfor %}
+    {% endfor %}
+{% endblock content %}
