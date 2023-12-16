@@ -16,12 +16,13 @@ class Order(models.Model):
     client = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        editable=False,
     )
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, editable=False)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    qr_code = models.ImageField(upload_to='qr_codes', blank=True)
+    qr_code = models.ImageField(upload_to='qr_codes', blank=True, editable=False)
     
     class StatusType(models.TextChoices):
         OPEN = ("OP", "Open")
@@ -40,7 +41,7 @@ class Order(models.Model):
     )
     
     def __str__(self):
-        return f'{self.client.username} - {self.restaurant.name} - {self.total_price} - {self.created_at}'
+        return f'{self.client.username} - {self.total_price} - {self.created_at.strftime(" %H:%M %d/%m/%Y")}'
     
     def save(self, *args, **kwargs):
         link = reverse('order:confirm_order', args=[self.id])

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -6,6 +7,20 @@ from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
 
 from .models import Restaurant, Menu, Food
+from order.models import Order, Item
+
+class LockedModel(object):
+    def has_add_permission(self, request, obj=None) -> bool:
+        return False
+    
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
+    
+
+class HiddenModel(object):
+    def has_module_permission(self, request):
+        # Hide the model from admin index
+        return False
 
 class EditLinkToInlineObject(object):
     def edit_link(self, instance):
@@ -60,15 +75,52 @@ class FoodInline(admin.TabularInline):
     extra = 1
 
 @admin.register(Menu)
-class MenuAdmin(admin.ModelAdmin):
+class MenuAdmin(HiddenModel, admin.ModelAdmin):
     inlines = [FoodInline]
     list_display = ('restaurant', 'name')
     list_filter = ['restaurant']
     search_fields = ['name']
 
-    def has_module_permission(self, request):
-        # Hide the model from admin index
-        return False
+
+class ItemInline(LockedModel, admin.TabularInline):
+    model = Item
+    extra = 0
+    can_delete = False
+    readonly_fields = ('food', 'quantity', 'price')
+
+@admin.register(Order)
+class OrderAdmin(HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
+    inlines = [ItemInline]
+
+class OrdersInline(LockedModel, admin.TabularInline):
+    model = Order
+    extra = 0
+    
+    can_delete = False
+    readonly_fields = ('client', 'total_price', 'created_at', 'updated_at', 'details_link')
+    
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        qs = super().get_queryset(request)
+        qs = qs.exclude(status=Order.StatusType.MADE
+              ).exclude(status=Order.StatusType.IN_PROGRESS)
+        return qs.order_by('-created_at')
+    
+    def details_link(self, instance):
+        url = reverse(f"admin:{instance._meta.app_label}_{instance._meta.model_name}_change",
+                      args=[instance.pk] )
+        if instance.pk:
+            return mark_safe(u'<a href="{u}">details</a>'.format(u=url))
+        else:
+            return ''
+
+class MakingOrdersInline(OrdersInline):
+    verbose_name = "Order in the Making"
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        qs = super(OrdersInline, self).get_queryset(request)
+        qs = qs.exclude(status=Order.StatusType.OPEN
+              ).exclude(status=Order.StatusType.CANCELLED    
+              ).exclude(status=Order.StatusType.DELIVERED)
+        return qs.order_by('-updated_at')
 
 class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     model = Menu
@@ -80,4 +132,4 @@ class RestaurantAdmin(PermissionCheckModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo']}),
     ]
-    inlines = [MenuInline]
+    inlines = [MenuInline, MakingOrdersInline, OrdersInline]

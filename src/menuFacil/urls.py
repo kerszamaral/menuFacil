@@ -14,7 +14,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from re import T
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
@@ -22,12 +21,14 @@ from django.views.generic import TemplateView
 
 from menuFacil import settings
 
+from . import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("restaurant/", include("restaurant.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
-    # path("client/", include("client.urls")),
+    path("register", views.register_request, name="register"),
     path("cart/", include("cart.urls")),
     path("order/", include("order.urls")),
 ]
