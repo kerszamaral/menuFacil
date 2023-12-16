@@ -21,16 +21,13 @@ from django.views.generic import TemplateView
 
 from menuFacil import settings
 
-from . import views
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("restaurant/", include("restaurant.urls")),
-    path("accounts/", include("django.contrib.auth.urls")),
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
-    path("register", views.register_request, name="register"),
     path("cart/", include("cart.urls")),
     path("order/", include("order.urls")),
+    path("account/", include("account.urls")),
 ]
 
 if settings.DEBUG:

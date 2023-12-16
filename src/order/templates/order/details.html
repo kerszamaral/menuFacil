@@ -4,8 +4,8 @@
   <p>Order ID: {{ order.id }}</p>
   <p>Customer Name: {{ order.client.username }}</p>
   <p>Restaurant Name: {{ order.restaurant.name }}</p>
-  <p>Order Date: {{ order.created_at }}</p>
-  <p>Last Updated: {{ order.updated_at }}</p>
+  <p>Order Date: {{ order.created_at|date:"H:i d/m/Y" }}</p>
+  <p>Last Updated: {{ order.updated_at|date:"H:i d/m/Y" }}</p>
   <p>Order Status: {{ order.get_status_display }}</p>
 
   {% if order.status == "OP" %}

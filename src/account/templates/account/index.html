@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Account
+{% endblock %}
+
+{% block content %}
+
+    <h1>Account</h1>
+    <p>Hi {{ user.username }}!</p>
+    <p>Here you can change your account settings.</p>
+    <p>Click on the links below to change your account settings.</p>
+  <p><a href="{% url 'account:password_change' %}">Change Password</a></p>
+  <p><a href="{% url 'account:password_reset' %}">Reset Password</a></p>
+  <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+    {% csrf_token %}
+    <button type="submit">Log out</button>
+  </form>
+  <small>
+        <a href="{% url 'account:delete' request.user.pk %}" class="text-muted">Delete your account</a>
+    </small>
+{% endblock %}

@@ -7,7 +7,7 @@ from cart.models import Cart
 from .models import Order
 
 # Create your views here.
-@login_required(login_url='client:login')
+@login_required
 def create_order(request: HttpRequest) -> HttpResponse:
     cart = Cart.objects.filter(client=request.user)
     restaurant = cart.first().food.menu.restaurant
@@ -27,7 +27,7 @@ def create_order(request: HttpRequest) -> HttpResponse:
     cart.delete()
     return render(request, 'order/validate.html', {'order': order, 'restaurant': restaurant})
 
-@login_required(login_url='client:login')
+@login_required
 def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     # if not request.user.is_staff:
         # return HttpResponse('Unauthorized', status=401)
@@ -37,19 +37,19 @@ def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order.save()
     return redirect('order:list_orders')
 
-@login_required(login_url='client:login')
+@login_required
 def list_orders(request: HttpRequest) -> HttpResponse:
     orders = Order.objects.filter(client=request.user)
     orders = orders.order_by('-created_at')
     
     return render(request, 'order/list.html', {'orders': orders, "open": Order.StatusType.OPEN})
 
-@login_required(login_url='client:login')
+@login_required
 def details_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
     return render(request, 'order/details.html', {'order': order})
     
-@login_required(login_url='client:login')
+@login_required
 def reopen_confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
     return render(request, 'order/validate.html', {'order': order})

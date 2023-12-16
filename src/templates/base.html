@@ -13,21 +13,22 @@
     <main>
       {% block login %}
         {% if user.is_authenticated %}
-          Hi {{ user.username }}!<form id="logout-form" method="post" action="{% url 'admin:logout' %}">
-            {% csrf_token %}
-            <button type="submit">Log out</button>
-          </form>
-          <a href="{% url 'cart:cart_detail' %}">
-            Cart{% if cart %}
-              ({{ cart|length }})
-            {% endif %}
-          </a>
+          <p>
+            Hi <a href="{% url 'account:profile' %}">{{ user.username }}</a>!
+          </p>
+          <p>
+            <a href="{% url 'cart:cart_detail' %}">
+              Cart{% if cart %}
+                ({{ cart|length }})
+              {% endif %}
+            </a>
 
-          <br /><a href="{% url 'order:list_orders' %}">My orders</a>
+            <br /><a href="{% url 'order:list_orders' %}">My orders</a>
+          </p>
         {% else %}
           <p>You are not logged in</p>
-          <a href="{% url 'login' %}">Log In</a>
-          <a href="{%url 'register' %}">Register</a>
+          <a href="{% url 'account:login' %}">Log In</a>
+          <a href="{% url 'account:signup' %}">Sign Up</a>
         {% endif %}
         {{ message }}
         <br /><a href="{% url 'restaurant:index' %}">Home</a>

@@ -15,10 +15,10 @@
         <tbody>
             {% for order in orders %}
                 <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.created_at }}</td>
-                    <td>{{ order.status }} </td>
-                    <td>{{ order.total_price }} </td>
+                    <td>{{ order.id|truncatechars:9 }}</td>
+                    <td>{{ order.created_at|date:"H:i d/m/Y" }}</td>
+                    <td>{{ order.get_status_display }} </td>
+                    <td>R$ {{ order.total_price }} </td>
                     <td> <a href="{% url 'order:details_order' order.id %}">Details</a> </td>
                 </tr>
             {% endfor %}

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "restaurant.apps.RestaurantConfig",
     "cart.apps.CartConfig",
     "order.apps.OrderConfig",
+    "account.apps.AccountConfig",
     'guardian',
     'crispy_forms',
     'crispy_bootstrap4',
