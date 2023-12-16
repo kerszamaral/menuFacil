@@ -1,12 +1,10 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect, render, get_object_or_404
-from django.contrib import messages
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.urls import reverse
 
-from .models import Restaurant, Food
+from .models import Restaurant
 
 # Create your views here.
 class RestaurantsView(generic.ListView):
@@ -19,12 +17,5 @@ class RestaurantsView(generic.ListView):
 
 def menu(request: HttpRequest, restaurant_id: int) -> HttpResponse:
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
-    
-    if request.method == 'POST' and request.user.is_authenticated:
-        food_id = request.POST['food_id']
-        food = get_object_or_404(Food, pk=food_id)
-        messages.success(request, f"{food.name} added to cart.")
-        return redirect('cart:add_to_cart', restaurant_id=restaurant_id, food_id=food_id)
-    
     return render(request, 'restaurant/detail.html', {'restaurant': restaurant})
         

@@ -16,15 +16,14 @@
     <h2>{{ menu.name }}</h2>
     {% for food in menu.food_set.all %}
       {% if not food.hidden %}
-      {% if food.photo %}
-        <img src="{{ food.photo.url }}" alt="{{ food.name }}" width="300" />
-      {% endif %}
-      <p>{{ food.name }} - R$ {{ food.price }}</p>
-      <form id="" method="post" action="{% url 'cart:add_to_cart' restaurant.id food.id %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input name='food_id' type="submit" value="food.id" />
-      </form>
+        <p>
+          <a href="{% url 'cart:add_to_cart' restaurant.id food.id %}">
+            {% if food.photo %}
+              <img src="{{ food.photo.url }}" alt="{{ food.name }}" width="300" />
+            {% endif %}
+            <br />{{ food.name }} - R$ {{ food.price }}
+          </a>
+        </p>
       {% endif %}
     {% endfor %}
   {% endfor %}
