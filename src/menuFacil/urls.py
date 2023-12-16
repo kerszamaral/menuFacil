@@ -27,7 +27,8 @@ urlpatterns = [
     path("restaurant/", include("restaurant.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
-    path("client/", include("client.urls")),
+    # path("client/", include("client.urls")),
+    path("cart/", include("cart.urls")),
 ]
 
 if settings.DEBUG:

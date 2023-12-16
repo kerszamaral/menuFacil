@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from uuid import uuid4
 
 # Create your models here.
 class Restaurant(models.Model):
@@ -27,6 +28,7 @@ class Menu(models.Model):
 
 class Food(models.Model):
     """Model representing a Food item."""
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=5, decimal_places=2,
