@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Order</h1>
+  <p>Order ID: {{ order.id }}</p>
+  <p>Customer Name: {{ order.client.username }}</p>
+  <p>Restaurant Name: {{ order.restaurant.name }}</p>
+  <p>Order Date: {{ order.created_at }}</p>
+  <p>Last Updated: {{ order.updated_at }}</p>
+  <p>Order Status: {{ order.get_status_display }}</p>
+
+  {% if order.status == "OP" %}
+    <a href="{% url 'order:reopen_confirm_order' order.id %}">Reconfirm Order</a>
+  {% endif %}
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Total Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order.item_set.all %}
+        <tr>
+          <td>{{ item.food }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.food.price }}</td>
+          <td>{{ item.price }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3"></td>
+        <td>Total:</td>
+        <td>{{ order.total_price }}</td>
+      </tr>
+    </tfoot>
+  </table>
+{% endblock %}

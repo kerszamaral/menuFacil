@@ -31,8 +31,7 @@
                 </tr>
             </tfoot>
         </table>
-
-        {% comment %} <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a> {% endcomment %}
+        <a href="{% url 'order:create_order' %}" class="btn btn-primary">Checkout</a>
     {% else %}
         <p>Your shopping cart is empty.</p>
     {% endif %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  QR Code
+{% endblock %}
+
+{% block head %}
+  <style>
+    img {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  {% if order %}
+    <img src="{{ order.qr_code.url }}" alt="QR Code" />
+    <a href="{% url 'order:confirm_order' order.id %}">Validate</a>
+  {% else %}
+    <p>Unable to generate QR Code</p>
+  {% endif %}
+{% endblock %}

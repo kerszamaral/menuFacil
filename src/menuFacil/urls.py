@@ -29,6 +29,7 @@ urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     # path("client/", include("client.urls")),
     path("cart/", include("cart.urls")),
+    path("order/", include("order.urls")),
 ]
 
 if settings.DEBUG:

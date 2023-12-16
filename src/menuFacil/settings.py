@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "restaurant.apps.RestaurantConfig",
-    # "client.apps.ClientConfig",
     "cart.apps.CartConfig",
+    "order.apps.OrderConfig",
     'guardian',
 ]
 

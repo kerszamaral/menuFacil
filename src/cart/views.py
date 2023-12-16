@@ -3,14 +3,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
-
 from django.urls import reverse
 
-import cart
-
 from .models import Cart
-from restaurant.models import Food
 
 # Create your views here.
 @login_required(login_url='client:login')
@@ -49,11 +44,3 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
     }
 
     return render(request, 'cart/cart_detail.html', context)
-
-# @login_required(login_url='/login')
-# def close_cart(request: HttpRequest, order_id: int) -> HttpResponse:
-#     order = Order.objects.get(id=order_id)
-#     order.status = Order.StatusType.PENDING
-#     order.save()
-#     messages.success(request, 'Order sent to restaurant')
-#     return redirect('client:orders')
