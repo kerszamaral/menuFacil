@@ -31,7 +31,9 @@
           <a href="{% url 'account:signup' %}">Sign Up</a>
         {% endif %}
         {{ message }}
-        <br /><a href="{% url 'restaurant:index' %}">Home</a>
+        <p>
+          <a href="{% url 'restaurant:index' %}">Home</a>
+        </p>
       {% endblock %}
 
       {% block content %}
