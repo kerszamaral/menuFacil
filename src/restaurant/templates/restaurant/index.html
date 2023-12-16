@@ -1,14 +1,23 @@
+{% extends "base.html" %}
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'restaurant/style.css' %}">
+{% block title %}Restaurants{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{% static 'restaurant/style.css' %}">
+{% endblock %}
+
+{% block content%}
 {% if restaurant_list %}
-    <ul>
+    <p>Restaurants:</p>
+        <ul>
     {% for restaurant in restaurant_list %}
         <li>
             <a href={% url 'restaurant:detail' restaurant.id %}>
-                <img src="{{ restaurant.logo.url }}" alt="{{ restaurant.name }}" href={% url 'restaurant:detail' restaurant.id %} width="300" height="200">
-                <br>
+                {% if restaurant.logo %}
+                    <img src="{{ restaurant.logo.url }}" alt="{{ restaurant.name }}" href={% url 'restaurant:detail' restaurant.id %} width="300" height="200">
+                    <br>
+                {% endif %}
                 {{ restaurant.name }}
             </a>
         </li>
@@ -17,3 +26,4 @@
 {% else %}
     <p>No restaurants are available.</p>
 {% endif %}
+{% endblock %}

@@ -1,12 +1,35 @@
+{% extends 'base.html' %}
 {% load static %}
 
+{% block title %}
+  Home
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'restaurant/style.css' %}" />
+{% endblock %}
 {% block content %}
-    <h1>{{ restaurant.name }}</h1>
-    <p>Welcome to our menus</p>
-    {% for menu in restaurant.menu_set.all %}
-        <h2> {{ menu.name }} </h2>
-        {% for food in menu.food_set.all %}
-            <p> {{ food.name }} - {{ food.price }} </p>
-        {% endfor %}
+  <h1>{{ restaurant.name }}</h1>
+  <p>Welcome to our menus</p>
+
+  <form id="" method="post" action="{% url 'restaurant:close_cart' restaurant.id%}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Close cart" />
+  </form>
+
+  {% for menu in restaurant.menu_set.all %}
+    <h2>{{ menu.name }}</h2>
+    {% for food in menu.food_set.all %}
+      <form id="" method="post" action="{% url 'restaurant:cart' restaurant.id menu.id food.id %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if food.photo %}
+          <img src="{{ food.photo.url }}" alt="{{ food.name }}" width="300" />
+        {% endif %}
+        <p>{{ food.name }} - R$ {{ food.price }}</p>
+        <input type="submit" value="Add to cart" />
+      </form>
     {% endfor %}
-{% endblock content %}
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,31 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      {% block title %}
+        Django Auth Tutorial
+      {% endblock %}
+    </title>
+  </head>
+  <body>
+    <main>
+      {% block login %}
+        {% if user.is_authenticated %}
+          Hi {{ user.username }}!<form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+            {% csrf_token %}
+            <button type="submit">Log out</button>
+          </form>
+        {% else %}
+          <p>You are not logged in</p>
+          <a href="{% url 'login' %}">Log In</a>
+        {% endif %}
+      {% endblock %}
+
+      {% block content %}
+
+      {% endblock %}
+    </main>
+  </body>
+</html>
