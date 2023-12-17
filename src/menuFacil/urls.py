@@ -21,6 +21,10 @@ from django.urls import path, include
 from . import views
 from menuFacil import settings
 
+admin.site.site_title = "Menu Fácil site admin"
+admin.site.site_header = "Menu Fácil administration"
+admin.site.index_title = "Menu Fácil administration"
+
 urlpatterns = [
     path("", views.index, name="home"),
     path("account/", include("account.urls")),
