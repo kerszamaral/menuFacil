@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
+from django_object_actions import DjangoObjectActions
 
 from .models import Restaurant, Menu, Food
 from order.models import Order, Item
@@ -89,15 +90,29 @@ class ItemInline(LockedModel, admin.TabularInline):
     readonly_fields = ('food', 'quantity', 'price')
 
 @admin.register(Order)
-class OrderAdmin(HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
+class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
     inlines = [ItemInline]
+    
+    readonly_fields = ('pending_cancelation', 'client', 'total_price', 'created_at', 'updated_at')
+    
+    def approve_cancellation(self, request, obj):
+        if obj.pending_cancelation and obj.status == Order.StatusType.OPEN:
+            obj.status = Order.StatusType.CANCELLED
+            obj.save()
+            self.message_user(request, "Order cancelled")
+        else:
+            self.message_user(request, "Order not pending cancellation")
+    
+    
+    change_actions = ('approve_cancellation', )
+
 
 class OrdersInline(LockedModel, admin.TabularInline):
     model = Order
     extra = 0
     
     can_delete = False
-    readonly_fields = ('client', 'total_price', 'created_at', 'updated_at', 'details_link')
+    readonly_fields = ('pending_cancelation', 'client', 'total_price', 'created_at', 'updated_at', 'details_link')
     
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)

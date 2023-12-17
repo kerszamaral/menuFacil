@@ -16,10 +16,15 @@
 
 {% block content %}
   {% if order %}
-    <img src="{{ order.qr_code.url }}" alt="QR Code" />
-    <p>
-      <a href="{% url 'order:confirm_order' order.id %}">Validate</a>
-    </p>
+    {% if cancel %}
+      <a href="{% url 'order:cancelation_order' order.id %}">
+        <img src="{{ order.qr_code.url }}" alt="QR Code" />
+      </a>
+    {% else %}
+      <a href="{% url 'order:confirm_order' order.id %}">
+        <img src="{{ order.qr_code.url }}" alt="QR Code" />
+      </a>
+    {% endif %}
   {% else %}
     <p>Unable to generate QR Code</p>
   {% endif %}

@@ -1,6 +1,7 @@
 /* Add a black background color to the top navigation */
 html {
     background-color: #131516;
+    color: #f2f2f2;
 }
 
 .topnav {

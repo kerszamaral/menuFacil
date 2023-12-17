@@ -8,5 +8,7 @@ urlpatterns = [
     path('confirm/<uuid:order_id>/', views.confirm_order, name='confirm_order'),
     path('list/', views.list_orders, name='list_orders'),
     path('details/<uuid:order_id>/', views.details_order, name='details_order'),
-    path('reopen/<uuid:order_id>/', views.reopen_confirm_order, name='reopen_confirm_order')
+    path('reopen/<uuid:order_id>/', views.reopen_confirm_order, name='reopen_confirm_order'),
+    path('cancel/<uuid:order_id>/', views.cancel_order, name='cancel_order'),
+    path('cancelation/<uuid:order_id>/', views.cancel_order_confirm, name='cancelation_order'),
 ]

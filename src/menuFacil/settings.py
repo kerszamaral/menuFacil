@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'guardian',
     'crispy_forms',
     'crispy_bootstrap4',
+    'django_object_actions',
 ]
 
 MIDDLEWARE = [

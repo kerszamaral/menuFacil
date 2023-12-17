@@ -23,6 +23,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True, editable=False)
+    pending_cancelation = models.BooleanField(default=False)
     
     class StatusType(models.TextChoices):
         OPEN = ("OP", "Open")
