@@ -36,7 +36,7 @@ def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
     order.status = Order.StatusType.MADE
     order.save()
-    return redirect('order:list_orders')
+    return redirect('order:pay_order', order_id=order.id)
 
 @login_required
 def list_orders(request: HttpRequest) -> HttpResponse:
@@ -63,7 +63,18 @@ def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
 @login_required
 def cancel_order_confirm(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    print(order)
-    order.peding_cancelation = True
+    order.pending_cancellation = True
+    order.save()
+    return redirect('order:list_orders')
+
+@login_required
+def pay_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'pay': True})
+
+@login_required
+def payed_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
+    order = get_object_or_404(Order, id=order_id)
+    order.payed = True
     order.save()
     return redirect('order:list_orders')

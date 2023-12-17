@@ -13,10 +13,10 @@ from order.models import Order, Item
 class LockedModel(object):
     def has_add_permission(self, request, obj=None) -> bool:
         return False
-    
+
     def has_delete_permission(self, request, obj=None) -> bool:
         return False
-    
+
 
 class HiddenModel(object):
     def has_module_permission(self, request):
@@ -92,34 +92,35 @@ class ItemInline(LockedModel, admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
     inlines = [ItemInline]
-    
-    readonly_fields = ('pending_cancelation', 'client', 'total_price', 'created_at', 'updated_at')
-    
+    readonly_fields = ('pending_cancellation', 'payed',
+                       'client', 'total_price', 'created_at',
+                       'updated_at')
+
     def approve_cancellation(self, request, obj):
-        if obj.pending_cancelation and obj.status == Order.StatusType.OPEN:
+        if obj.pending_cancellation and obj.status == Order.StatusType.OPEN:
             obj.status = Order.StatusType.CANCELLED
             obj.save()
             self.message_user(request, "Order cancelled")
         else:
             self.message_user(request, "Order not pending cancellation")
-    
-    
-    change_actions = ('approve_cancellation', )
 
+    change_actions = ('approve_cancellation', )
 
 class OrdersInline(LockedModel, admin.TabularInline):
     model = Order
     extra = 0
-    
+
     can_delete = False
-    readonly_fields = ('pending_cancelation', 'client', 'total_price', 'created_at', 'updated_at', 'details_link')
-    
+    readonly_fields = ('pending_cancellation', 'payed', 
+                       'client', 'total_price', 'created_at',
+                       'updated_at', 'details_link')
+
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)
         qs = qs.exclude(status=Order.StatusType.MADE
               ).exclude(status=Order.StatusType.IN_PROGRESS)
         return qs.order_by('-created_at')
-    
+
     def details_link(self, instance):
         url = reverse(f"admin:{instance._meta.app_label}_{instance._meta.model_name}_change",
                       args=[instance.pk] )

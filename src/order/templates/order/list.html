@@ -8,6 +8,7 @@
                 <th>Order ID</th>
                 <th>Order Date</th>
                 <th>Order Status</th>
+                <th>Order Payed</th>
                 <th>Order Total</th>
                 <th> </th>
             </tr>
@@ -18,6 +19,11 @@
                     <td>{{ order.id|truncatechars:9 }}</td>
                     <td>{{ order.created_at|date:"H:i d/m/Y" }}</td>
                     <td>{{ order.get_status_display }} </td>
+                    {% if not order.payed %}
+                        <td><a href="{% url 'order:pay_order' order.id %}"> {{ order.payed }} </a> </td>
+                    {% else %}
+                        <td> {{ order.payed }} </td>
+                    {% endif %}
                     <td>R$ {{ order.total_price }} </td>
                     <td> <a href="{% url 'order:details_order' order.id %}">Details</a> </td>
                 </tr>
@@ -27,6 +33,4 @@
     {% else %}
         <h2> You have no orders </h2>
     {% endif %}
-    
-
 {% endblock %}

@@ -7,9 +7,10 @@
   <p>Order Date: {{ order.created_at|date:'H:i d/m/Y' }}</p>
   <p>Last Updated: {{ order.updated_at|date:'H:i d/m/Y' }}</p>
   <p>Order Status: {{ order.get_status_display }}</p>
+  <p>Order Payed: {{ order.payed }}</p>
 
-  {% if order.pending_cancelation %}
-    <p>Cancelation Requested: {{ order.pending_cancelation }}</p>
+  {% if order.pending_cancellation %}
+    <p>Cancelation Requested: {{ order.pending_cancellation }}</p>
   {% endif %}
 
   {% if order.status == 'OP' %}
@@ -17,10 +18,15 @@
   {% endif %}
 
   {% if order.status == 'OP' or order.status == 'MD' or order.status == 'IP' %}
-    {% if not order.pending_cancelation  %}
+    {% if not order.pending_cancellation and not order.payed %}
       <a href="{% url 'order:cancel_order' order.id %}">Cancel Order</a>
     {% endif %}
   {% endif %}
+
+  {% if not order.payed %}
+    <a href="{% url 'order:pay_order' order.id %}">Pay Order</a>
+  {% endif %}
+
   <table class="table">
     <thead>
       <tr>
