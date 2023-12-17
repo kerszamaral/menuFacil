@@ -12,7 +12,7 @@
     <p>Click on the links below to change your account settings.</p>
   <p><a href="{% url 'account:password_change' %}">Change Password</a></p>
   <p><a href="{% url 'account:password_reset' %}">Reset Password</a></p>
-  <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+  <form id="logout-form" method="post" action="{% url 'account:logout' %}">
     {% csrf_token %}
     <button type="submit">Log out</button>
   </form>

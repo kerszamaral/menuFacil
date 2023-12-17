@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import DeleteView
@@ -14,12 +14,12 @@ def signup(request):
         form = NewUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Registration successful." )
             return redirect("home")
         messages.error(request, "Unsuccessful registration. Invalid information.")
     form = NewUserForm()
-    return render (request=request, template_name="account/signup.html", context={"register_form":form})
+    return render(request=request, template_name="account/signup.html", context={"register_form":form})
 
 @login_required
 def index(request):
@@ -28,6 +28,11 @@ def index(request):
 @login_required
 def profile(request):
     return render(request, 'account/profile.html')
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('home')
 
 class UserDelete(DeleteView):
     model = get_user_model()

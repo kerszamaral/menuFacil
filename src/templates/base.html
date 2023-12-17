@@ -16,6 +16,11 @@
           <p>
             Hi <a href="{% url 'account:profile' %}">{{ user.username }}</a>!
           </p>
+          {% if user.is_staff %}
+            <p>
+              <a href="{% url 'admin:index' %}">Admin</a>
+            </p>
+          {% endif %}
           <p>
             <a href="{% url 'cart:cart_detail' %}">
               Cart{% if cart %}
