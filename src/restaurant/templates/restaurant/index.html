@@ -7,15 +7,16 @@
     <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}" />
 {% endblock %}
 
+
 {% block content%}
 <div class="menu">
-    <h1>Restaurants</h1>
+    <h1 class="texto">Restaurants</h1>
     {% if restaurant_list %}
     {% for restaurant in restaurant_list %}
     <section class="menu-item">
         <div class="item">
         <a href={% url 'restaurant:detail' restaurant.id %} class="cart">
-        <h3>{{ restaurant.name }}</h3>
+        <h3 class = "nome">{{ restaurant.name }}</h3>
             {% if restaurant.logo %}
                 <img src="{{ restaurant.logo.url }}" alt="{{ restaurant.name }}" href={% url 'restaurant:detail' restaurant.id %} width="300" height="200">
                 <br>

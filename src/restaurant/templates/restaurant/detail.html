@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="menu">
+  <div style = "margin:0" class="menu">
     <h1>{{ restaurant.name }}</h1>
     <h2>{{ restaurant.message }}</h2>
     {% for menu in restaurant.menu_set.all %}
