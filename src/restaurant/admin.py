@@ -103,15 +103,23 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin
             self.message_user(request, "Order cancelled")
         else:
             self.message_user(request, "Order not pending cancellation")
+            
+    def approve_payment(self, request, obj):
+        if not obj.payed and not obj.status == Order.StatusType.OPEN and not obj.status == Order.StatusType.CANCELLED and not obj.pending_cancellation:
+            obj.payed = True
+            obj.save()
+            self.message_user(request, "Order payed")
+        else:
+            self.message_user(request, "Unable to pay order")
 
-    change_actions = ('approve_cancellation', )
+    change_actions = ('approve_cancellation', 'approve_payment')
 
 class OrdersInline(LockedModel, admin.TabularInline):
     model = Order
     extra = 0
 
     can_delete = False
-    readonly_fields = ('pending_cancellation', 'payed', 
+    readonly_fields = ('pending_cancellation', 'payed',
                        'client', 'total_price', 'created_at',
                        'updated_at', 'details_link')
 
