@@ -7,6 +7,7 @@
 
 {% block content %}
 
+<div class = "carrinho">
     {% if cart_items %}
         <table class="table">
             <thead>
@@ -31,14 +32,16 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3"></td>
+                    <td><a href="{% url 'order:create_order' %}" class="btn btn-primary">Checkout</a></td>
+                    <td colspan="2"></td>
                     <td>Total:</td>
                     <td>{{ total_price }}</td>
                 </tr>
             </tfoot>
         </table>
-        <a href="{% url 'order:create_order' %}" class="btn btn-primary">Checkout</a>
+        
     {% else %}
         <p>Your shopping cart is empty.</p>
     {% endif %}
+</div>
 {% endblock %}

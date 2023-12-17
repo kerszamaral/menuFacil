@@ -1,0 +1,43 @@
+.menu{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.cardapios{
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+}
+
+.menu-item{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.item a {
+    color: black;
+    text-decoration: none;
+    text-align: center;
+}
+
+.item a img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 300px;
+    height: 300px;
+    color: black;
+}

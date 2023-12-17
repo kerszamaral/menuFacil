@@ -6,20 +6,21 @@
 {% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'restaurant/css/details.css' %}" />
 {% endblock %}
 
 {% block content %}
   <div style = "margin:0" class="menu">
     <h1>{{ restaurant.name }}</h1>
     <h2>{{ restaurant.message }}</h2>
+    <div class = "cardapios">
     {% for menu in restaurant.menu_set.all %}
-      <section class="menu-item">
-        <h3>{{ menu.name }}</h3>
+      <section>
+        <h3 class="menu-item">{{ menu.name }}</h3>
         {% for food in menu.food_set.all %}
           {% if not food.hidden %}
             <div class="item">
-              <a href="{% url 'cart:add_to_cart' restaurant.id food.id %}" class="cart">
+              <a href="{% url 'cart:add_to_cart' restaurant.id food.id %}">
                 {% if food.photo %}
                   <img src="{{ food.photo.url }}" alt="{{ food.name }}" width="300"/>
                 {% endif %}
@@ -31,5 +32,6 @@
         {% endfor %}
       </section>
     {% endfor %}
+  </div>
   </div>
 {% endblock %}
