@@ -2,29 +2,34 @@
 {% load static %}
 
 {% block title %}
-  Home
+  {{ restaurant.name }}
 {% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="{% static 'restaurant/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}" />
 {% endblock %}
-{% block content %}
-  <h1>{{ restaurant.name }}</h1>
-  <p>Welcome to our menus</p>
 
-  {% for menu in restaurant.menu_set.all %}
-    <h2>{{ menu.name }}</h2>
-    {% for food in menu.food_set.all %}
-      {% if not food.hidden %}
-        <p>
-          <a href="{% url 'cart:add_to_cart' restaurant.id food.id %}">
-            {% if food.photo %}
-              <img src="{{ food.photo.url }}" alt="{{ food.name }}" width="300" />
-            {% endif %}
-            <br />{{ food.name }} - R$ {{ food.price }}
-          </a>
-        </p>
-      {% endif %}
+{% block content %}
+  <div class="menu">
+    <h1>{{ restaurant.name }}</h1>
+    <h2>{{ restaurant.message }}</h2>
+    {% for menu in restaurant.menu_set.all %}
+      <section class="menu-item">
+        <h3>{{ menu.name }}</h3>
+        {% for food in menu.food_set.all %}
+          {% if not food.hidden %}
+            <div class="item">
+              <a href="{% url 'cart:add_to_cart' restaurant.id food.id %}" class="cart">
+                {% if food.photo %}
+                  <img src="{{ food.photo.url }}" alt="{{ food.name }}" width="300"/>
+                {% endif %}
+                <p>{{ food.name }} - R$ {{ food.price }}</p>
+                <p>{{ food.description }}</p>
+              </a>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </section>
     {% endfor %}
-  {% endfor %}
+  </div>
 {% endblock %}

@@ -130,6 +130,6 @@ class MenuInline(admin.TabularInline, EditLinkToInlineObject):
 @admin.register(Restaurant)
 class RestaurantAdmin(PermissionCheckModelAdmin):
     fieldsets = [
-        (None, {'fields': ['name', 'address', 'phone', 'logo']}),
+        (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
     inlines = [MenuInline, MakingOrdersInline, OrdersInline]

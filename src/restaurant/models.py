@@ -10,6 +10,7 @@ class Restaurant(models.Model):
     address = models.CharField(max_length=200)
     phone = models.CharField(max_length=200)
     logo = models.ImageField(upload_to='restaurant/logos', blank=True)
+    message = models.TextField(blank=True)
 
     def __str__(self) -> str:
         return str(self.name)
