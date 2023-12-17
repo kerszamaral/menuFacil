@@ -4,6 +4,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
+from django.contrib.messages import get_messages
 
 from .models import Cart
 
@@ -41,6 +42,7 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
     context = {
         'cart_items': cart,
         'total_price': total_price,
+        'messages':get_messages(request)
     }
 
     return render(request, 'cart/cart_detail.html', context)

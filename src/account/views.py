@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import DeleteView
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 
 from .forms import NewUserForm
 
@@ -19,15 +20,15 @@ def signup(request):
             return redirect("home")
         messages.error(request, "Unsuccessful registration. Invalid information.")
     form = NewUserForm()
-    return render(request=request, template_name="account/signup.html", context={"register_form":form})
+    return render(request=request, template_name="account/signup.html", context={"register_form":form, 'messages':get_messages(request)})
 
 @login_required
 def index(request):
-    return render(request, 'account/index.html')
+    return render(request, 'account/index.html',  {'messages':get_messages(request)})
 
 @login_required
 def profile(request):
-    return render(request, 'account/profile.html')
+    return render(request, 'account/profile.html', {'messages':get_messages(request)})
 
 @login_required
 def logout_view(request):

@@ -3,6 +3,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
+from django.contrib.messages import get_messages
 
 from .models import Restaurant
 
@@ -17,5 +18,5 @@ class RestaurantsView(generic.ListView):
 
 def menu(request: HttpRequest, restaurant_id: int) -> HttpResponse:
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
-    return render(request, 'restaurant/detail.html', {'restaurant': restaurant})
+    return render(request, 'restaurant/detail.html', {'restaurant': restaurant, 'messages':get_messages(request)})
         

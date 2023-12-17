@@ -1,8 +1,8 @@
 from uuid import UUID
-from cv2 import log
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
 
 from cart.models import Cart
 from .models import Order
@@ -26,7 +26,7 @@ def create_order(request: HttpRequest) -> HttpResponse:
             price=item.price,
         )
     cart.delete()
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': restaurant})
+    return render(request, 'order/validate.html', {'order': order, 'restaurant': restaurant, 'messages':get_messages(request)})
 
 @login_required
 def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
@@ -43,22 +43,22 @@ def list_orders(request: HttpRequest) -> HttpResponse:
     orders = Order.objects.filter(client=request.user)
     orders = orders.order_by('-created_at')
     
-    return render(request, 'order/list.html', {'orders': orders, "open": Order.StatusType.OPEN})
+    return render(request, 'order/list.html', {'orders': orders, "open": Order.StatusType.OPEN, 'messages':get_messages(request)})
 
 @login_required
 def details_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/details.html', {'order': order})
+    return render(request, 'order/details.html', {'order': order, 'messages':get_messages(request)})
     
 @login_required
 def reopen_confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order})
+    return render(request, 'order/validate.html', {'order': order, 'messages':get_messages(request)})
 
 @login_required
 def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'cancel': True})
+    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'cancel': True, 'messages':get_messages(request)})
 
 @login_required
 def cancel_order_confirm(request: HttpRequest, order_id: UUID) -> HttpResponse:
@@ -70,7 +70,7 @@ def cancel_order_confirm(request: HttpRequest, order_id: UUID) -> HttpResponse:
 @login_required
 def pay_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'pay': True})
+    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'pay': True, 'messages':get_messages(request)})
 
 @login_required
 def payed_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
