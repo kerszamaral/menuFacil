@@ -55,6 +55,18 @@ cd src
 python manage.py migrate
 ```
 
+### e crie os grupos de usuários com
+
+```bash
+python manage.py create_groups
+```
+
+### Para criar um superusuário, use
+
+```bash
+python manage.py createsuperuser
+```
+
 ### e rode o servidor com
 
 ```bash
