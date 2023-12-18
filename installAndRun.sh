@@ -7,6 +7,10 @@ pip install -r requirements.txt &&
 cd src &&
 python manage.py migrate &&
 python manage.py create_groups &&
-python manage.py createsuperuser &&
+if [ ! -f db.sqlite3 ]; then
+    python manage.py createsuperuser
+fi &&
+echo &&
 echo "The server is running at http://$ip_address:8000" &&
+echo &&
 python manage.py runserver 0.0.0.0:8000 --insecure
