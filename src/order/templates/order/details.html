@@ -41,7 +41,15 @@
           </tr>
           <tr>
             <td>Order Payed:</td>
-            <td>{{ order.payed }}</td>
+            {% if order.status == 'OP' %}
+              <td>Waiting Confirmation</td>
+            {% elif not order.payed %}
+              <td>
+                <a href="{% url 'order:pay_order' order.id %}">Pay</a>
+              </td>
+            {% else %}
+              <td>Payed</td>
+            {% endif %}
           </tr>
 
           {% if order.pending_cancellation %}
@@ -66,12 +74,6 @@
               <a href="{% url 'order:cancel_order' order.id %}" c>Cancel Order</a>
             </div>
           {% endif %}
-        {% endif %}
-
-        {% if not order.payed and order.status != 'OP' %}
-          <div>
-            <a href="{% url 'order:pay_order' order.id %}">Pay Order</a>
-          </div>
         {% endif %}
       </div>
     </div>
