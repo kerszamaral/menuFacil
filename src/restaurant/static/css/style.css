@@ -1,5 +1,5 @@
 /* Add a black background color to the top navigation */
-html{
+html {
     font-family: Arial;
 }
 
@@ -9,7 +9,6 @@ html{
     display:flex;
     align-items: center;
     justify-content: center;
-    
     align-content: center;
     margin : 0;
 }
@@ -42,13 +41,12 @@ html{
     display: flex;
     align-items: center;
     justify-content: center;
-
     align-content: center;
     margin: 0;
 }
 
 /* Style the links inside the navigation bar */
-.topnav-green a {
+.messages a {
     float: left;
     color: #f2f2f2;
     text-align: center;

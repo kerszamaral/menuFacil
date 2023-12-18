@@ -35,7 +35,7 @@
             <a href="{% url 'account:signup' %}">Sign Up</a>
           {% endif %}
         </div>
-        <div class="topnav-green">
+        <div class="messages">
           {% if messages %}
             {% for message in messages %}
               <a{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</a>
