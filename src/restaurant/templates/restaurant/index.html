@@ -14,7 +14,7 @@
     {% if restaurant_list %}
     {% for restaurant in restaurant_list %}
     <section class="menu-item">
-        <div class="item">
+        <div class="container">
         <a href={% url 'restaurant:detail' restaurant.id %} class="cart">
         <h3 class = "nome">{{ restaurant.name }}</h3>
             {% if restaurant.logo %}

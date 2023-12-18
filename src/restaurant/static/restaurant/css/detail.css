@@ -18,6 +18,7 @@
     gap: 20px;*/
     display: flex;
     align-items: center;
+    flex-direction: column;
 }
 
 @media (max-width: 600px) {
@@ -71,8 +72,9 @@
     height: 300px;
     color: black;
 }
+
 .container {
-    margin: 5vh 5vw 5vh 5vw;
+    margin: 0vh 0vw 2vh 0vw;
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -88,11 +90,32 @@
     color: black;
     border: 1px solid black;
     border-radius: 12px;
-    margin-top: 25px;
+    margin-top: 0px;
     margin-bottom: 0px;
 }
 
 .container a:hover {
     background-color: #009879;
     color: white;
+}
+
+.container p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: center;
+}
+
+.container img {
+    margin-left: auto;
+    margin-right: auto;
+    width: 15vw;
+    height: 12vw;
+}
+
+.menus {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    vertical-align: text-top;
+    gap: 5vw;
 }
