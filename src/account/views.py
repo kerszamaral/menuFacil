@@ -25,15 +25,15 @@ def signup(request):
     form = NewUserForm()
     return render(request=request, template_name="account/signup.html", context={"register_form":form, 'messages':get_messages(request)})
 
-@login_required
+@login_required(login_url="/account/login/")
 def index(request):
     return render(request, 'account/index.html',  {'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
 
-@login_required
+@login_required(login_url="/account/login/")
 def profile(request):
     return render(request, 'account/profile.html', {'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
 
-@login_required
+@login_required(login_url="/account/login/")
 def logout_view(request):
     logout(request)
     return redirect('home')
