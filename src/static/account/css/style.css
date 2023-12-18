@@ -1,0 +1,134 @@
+.container {
+    margin: 5vh 5vw 5vh 5vw;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    font-size: 25px;
+}
+
+.container h1 {
+    font-size: 50px;
+    margin-bottom: 50px;
+}
+
+.container small,
+a {
+    margin-top: 100px;
+    text-decoration: none;
+}
+
+.button a {
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 25px;
+    margin-bottom: 0px;
+}
+
+.button a:hover {
+    background-color: #009879;
+    color: white;
+}
+
+.button button {
+    font-size: 25px;
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 50px;
+    margin-bottom: 0px;
+}
+
+.button button:hover {
+    background-color: #009879;
+    color: white;
+}
+
+.greeting {
+    margin-top: 10px;
+    margin-bottom: 50px;
+}
+
+.button-danger button {
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 25px;
+    margin-bottom: 0px;
+}
+
+.button-danger button:hover {
+    background-color: darkred;
+    color: white;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form input {
+    font-size: 25px;
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 0px;
+    margin-bottom: 25px;
+}
+
+.form p {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0px 0px;
+}
+
+.form button {
+    font-size: 25px;
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 15px;
+    margin-bottom: 0px;
+}
+
+.form button:hover {
+    background-color: #009879;
+    color: white;
+}
+
+.form small {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0px 0px;
+    margin-bottom: 15px;
+}
+
+.form ul {
+    border-radius: 12px;
+    border: 2px solid #009879;
+}
+
+.register {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
