@@ -1,3 +1,4 @@
+from typing import Any
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
@@ -6,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import DeleteView
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
+
+from cart.models import Cart
 
 from .forms import NewUserForm
 
@@ -24,11 +27,11 @@ def signup(request):
 
 @login_required
 def index(request):
-    return render(request, 'account/index.html',  {'messages':get_messages(request)})
+    return render(request, 'account/index.html',  {'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
 
 @login_required
 def profile(request):
-    return render(request, 'account/profile.html', {'messages':get_messages(request)})
+    return render(request, 'account/profile.html', {'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
 
 @login_required
 def logout_view(request):

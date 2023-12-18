@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Your Cart{% endblock %}
+
 {% block head %}
     <link rel="stylesheet" href="{% static 'cart/css/style.css' %}" />
 {% endblock %}
@@ -23,7 +25,11 @@
                 {% for item in cart_items %}
                     <tr>
                         <td>{{ item.food }}</td>
-                        <td>{{ item.quantity }}</td>
+                        <td>
+                            <a href="{% url 'cart:increase_quantity' item.food.id %}">+</a>
+                            {{ item.quantity }}
+                            <a href="{% url 'cart:decrease_quantity' item.food.id %}">-</a>
+                        </td>
                         <td>{{ item.food.price }}</td>
                         <td>{{ item.price  }}</td>
                         <td><a href="{% url 'cart:remove_from_cart' item.food.id %}">Remove</a></td>
@@ -39,7 +45,6 @@
                 </tr>
             </tfoot>
         </table>
-        
     {% else %}
         <p>Your shopping cart is empty.</p>
     {% endif %}

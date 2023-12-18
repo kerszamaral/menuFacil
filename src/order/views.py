@@ -26,7 +26,12 @@ def create_order(request: HttpRequest) -> HttpResponse:
             price=item.price,
         )
     cart.delete()
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': restaurant, 'messages':get_messages(request)})
+    ctx = {
+            'order': order, 'restaurant': restaurant, 
+            'messages':get_messages(request), 
+            'cart_length': Cart.get_cart_length(request.user)
+        }
+    return render(request, 'order/validate.html', ctx)
 
 @login_required
 def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
@@ -42,23 +47,29 @@ def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
 def list_orders(request: HttpRequest) -> HttpResponse:
     orders = Order.objects.filter(client=request.user)
     orders = orders.order_by('-created_at')
+    ctx = {
+            'orders': orders,
+            "open": Order.StatusType.OPEN,
+            'messages':get_messages(request),
+            'cart_length': Cart.get_cart_length(request.user)
+        }
     
-    return render(request, 'order/list.html', {'orders': orders, "open": Order.StatusType.OPEN, 'messages':get_messages(request)})
+    return render(request, 'order/list.html', ctx)
 
 @login_required
 def details_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/details.html', {'order': order, 'messages':get_messages(request)})
+    return render(request, 'order/details.html', {'order': order, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
     
 @login_required
 def reopen_confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'messages':get_messages(request)})
+    return render(request, 'order/validate.html', {'order': order, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
 
 @login_required
 def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'cancel': True, 'messages':get_messages(request)})
+    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'cancel': True, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
 
 @login_required
 def cancel_order_confirm(request: HttpRequest, order_id: UUID) -> HttpResponse:
@@ -70,7 +81,7 @@ def cancel_order_confirm(request: HttpRequest, order_id: UUID) -> HttpResponse:
 @login_required
 def pay_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'pay': True, 'messages':get_messages(request)})
+    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'pay': True, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
 
 @login_required
 def payed_order(request: HttpRequest, order_id: UUID) -> HttpResponse:

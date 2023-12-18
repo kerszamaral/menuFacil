@@ -2,30 +2,30 @@
 {% load static %}
 
 {% block title %}
-  QR Code
+  Order Validation
 {% endblock %}
 
 {% block head %}
-  <style>
-    img {
-      display: block;
-      margin: 0 auto;
-    }
-  </style>
+  <link rel="stylesheet" href="{% static 'order/css/style.css' %}" />
 {% endblock %}
 
 {% block content %}
-  {% if order %}
-    {% if cancel %}
-      <a href="{% url 'order:cancelation_order' order.id %}"><img src="{{ order.qr_code.url }}" alt="QR Code" /></a>
-    {% elif pay %}
-      <h1>Pay Now</h1>
-      <a href="{% url 'order:payed_order' order.id %}"><img src="{{ order.qr_code.url }}" alt="QR Code" /></a>
-      <a href="{% url 'order:list_orders' %}"><h1>Pay Later</h1></a>
+  <div class="container">
+    <h1>Order Validation</h1>
+    {% if order %}
+      {% if cancel %}
+        <h2>Action: Cancel</h2>
+        <a href="{% url 'order:cancelation_order' order.id %}"><img src="{{ order.qr_code.url }}" alt="QR Code" /></a>
+      {% elif pay %}
+        <h2>Action: Pay</h2>
+        <a href="{% url 'order:list_orders' %}"><h2>Pay Later</h2></a>
+        <a href="{% url 'order:payed_order' order.id %}"><img src="{{ order.qr_code.url }}" alt="QR Code" /></a>
+      {% else %}
+        <h2>Action: Confirm</h2>
+        <a href="{% url 'order:confirm_order' order.id %}"><img src="{{ order.qr_code.url }}" alt="QR Code" /></a>
+      {% endif %}
     {% else %}
-      <a href="{% url 'order:confirm_order' order.id %}"><img src="{{ order.qr_code.url }}" alt="QR Code" /></a>
+      <p>Unable to generate QR Code</p>
     {% endif %}
-  {% else %}
-    <p>Unable to generate QR Code</p>
-  {% endif %}
+  </div>
 {% endblock %}

@@ -19,13 +19,13 @@
         <div class="topnav">
           <a class="active" href="{% url 'restaurant:index' %}">Home</a>
           {% if user.is_authenticated %}
-            <a href="{% url 'account:profile' %}">{{ user.username }}</a>
             {% if user.is_staff %}
               <a href="{% url 'admin:index' %}">Admin</a>
             {% endif %}
+            <a href="{% url 'account:profile' %}">Account: {{ user.username }}</a>
             <a href="{% url 'cart:cart_detail' %}">
-              Cart{% if cart %}
-                ({{ cart|length }})
+              Cart {% if cart_length %}
+                ({{ cart_length }})
               {% endif %}
             </a>
 
@@ -34,7 +34,8 @@
             <a href="{% url 'account:login' %}">Log In</a>
             <a href="{% url 'account:signup' %}">Sign Up</a>
           {% endif %}
-          
+        </div>
+        <div class="topnav-green">
           {% if messages %}
             {% for message in messages %}
               <a{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</a>

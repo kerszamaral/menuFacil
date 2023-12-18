@@ -1,7 +1,19 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title%}
+    Your Orders
+{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'order/css/style.css' %}" />
+{% endblock %}
+
+
 {% block content %}
-    <h1> Your Orders </h1>
+    <h1 class = "carrinho"> Your Orders </h1>
     {% if orders %} 
+    <div class = "carrinho">
     <table class="table">
         <thead>
             <tr>
@@ -19,10 +31,12 @@
                     <td>{{ order.id|truncatechars:9 }}</td>
                     <td>{{ order.created_at|date:"H:i d/m/Y" }}</td>
                     <td>{{ order.get_status_display }} </td>
-                    {% if not order.payed %}
-                        <td><a href="{% url 'order:pay_order' order.id %}"> {{ order.payed }} </a> </td>
+                    {% if order.status == 'OP' %}
+                        <td> Waiting Confirmation </td>
+                    {% elif not order.payed %}
+                        <td><a href="{% url 'order:pay_order' order.id %}"> Pay </a> </td>
                     {% else %}
-                        <td> {{ order.payed }} </td>
+                        <td> Payed </td>
                     {% endif %}
                     <td>R$ {{ order.total_price }} </td>
                     <td> <a href="{% url 'order:details_order' order.id %}">Details</a> </td>
@@ -30,7 +44,8 @@
             {% endfor %}
         <tbody>
     </table>
+    </div>
     {% else %}
-        <h2> You have no orders </h2>
+        <h2 class = "carrinho"> You have no orders </h2>
     {% endif %}
 {% endblock %}

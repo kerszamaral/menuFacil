@@ -36,3 +36,24 @@ html{
     background-color: #04AA6D;
     color: white;
 }*/
+.topnav-green {
+    background-color: #04AA6D;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    align-content: center;
+    margin: 0;
+}
+
+/* Style the links inside the navigation bar */
+.topnav-green a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 20px;
+    margin: 0px 5vw 0px 5vw;
+}
