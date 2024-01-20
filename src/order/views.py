@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 
 from cart.models import Cart
+from tab.models import Tab
 from .models import Order
 
 # Create your views here.
@@ -12,8 +13,9 @@ from .models import Order
 def create_order(request: HttpRequest) -> HttpResponse:
     cart = Cart.objects.filter(client=request.user)
     restaurant = cart.first().food.menu.restaurant
+    tab = Tab.objects.get(client=request.user)
     order = Order.objects.create(
-        client=request.user,
+        tab=tab,
         restaurant=restaurant,
         total_price=sum(item.quantity * item.food.price for item in cart),
         status = Order.StatusType.OPEN,
@@ -45,7 +47,8 @@ def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
 
 @login_required(login_url="/account/login/")
 def list_orders(request: HttpRequest) -> HttpResponse:
-    orders = Order.objects.filter(client=request.user)
+    tab = Tab.objects.get(client=request.user)
+    orders = Order.objects.filter(tab=tab)
     orders = orders.order_by('-created_at')
     ctx = {
             'orders': orders,
