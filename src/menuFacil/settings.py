@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "cart.apps.CartConfig",
     "order.apps.OrderConfig",
     "account.apps.AccountConfig",
+    "tab.apps.TabConfig",
     'guardian',
     'crispy_forms',
     'crispy_bootstrap4',

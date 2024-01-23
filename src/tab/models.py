@@ -6,7 +6,7 @@ import qrcode
 from PIL import Image
 from django.core.files import File
 
-from menuFacil import settings
+from django.conf import settings
 
 class Tab(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
@@ -15,11 +15,11 @@ class Tab(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         editable=False,
+        blank=True
     )
 
     def save(self, *args, **kwargs):
-        link = reverse('order:confirm_order', args=[self.id])#Arrumar URL
-        qr_image = qrcode.make(link)
+        qr_image = qrcode.make(self.id)
         canvas = Image.new('RGB', (380, 380), color='white')
         canvas.paste(qr_image)
         file_name = f'qr_code_{self.id}.png'

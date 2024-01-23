@@ -6,7 +6,7 @@ from tab.models import Tab
 class Order(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, editable=False)
-    tab = models.ForeignKey(Tab, on_delete=models.CASCADE, editable=False)
+    tab = models.ForeignKey(Tab, on_delete=models.CASCADE, editable=False, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

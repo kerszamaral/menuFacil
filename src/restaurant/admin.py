@@ -93,7 +93,8 @@ class ItemInline(LockedModel, admin.TabularInline):
 class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
     inlines = [ItemInline]
     readonly_fields = ('pending_cancellation', 'payed',
-                       'client', 'total_price', 'created_at',
+                    #    'client', 
+                       'total_price', 'created_at',
                        'updated_at')
 
     def approve_cancellation(self, request, obj):
@@ -120,7 +121,8 @@ class OrdersInline(LockedModel, admin.TabularInline):
 
     can_delete = False
     readonly_fields = ('pending_cancellation', 'payed',
-                       'client', 'total_price', 'created_at',
+                    #    'client', 
+                       'total_price', 'created_at',
                        'updated_at', 'details_link')
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
