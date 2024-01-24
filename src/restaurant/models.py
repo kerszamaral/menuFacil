@@ -6,6 +6,7 @@ from uuid import uuid4
 # Create your models here.
 class Restaurant(models.Model):
     """Model representing a Restaurant."""
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     name = models.CharField(max_length=200)
     address = models.CharField(max_length=200)
     phone = models.CharField(max_length=200)
@@ -19,6 +20,7 @@ PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
 
 class Menu(models.Model):
     """Model representing a Menu of a Restaurant."""
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, editable=False)
     name = models.CharField(max_length=200)
     discount = models.DecimalField(max_digits=3, decimal_places=0, default=Decimal(0),
