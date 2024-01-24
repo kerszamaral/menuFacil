@@ -11,7 +11,6 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     pending_cancellation = models.BooleanField(default=False)
-    payed = models.BooleanField(default=False)
     
     class StatusType(models.TextChoices):
         OPEN = ("OP", "Open")
@@ -30,7 +29,7 @@ class Order(models.Model):
     )
     
     def __str__(self):
-        return f'{self.client.username} - {self.total_price} - {self.created_at.strftime(" %H:%M %d/%m/%Y")}'
+        return f'{self.tab.id} - {self.total_price} - {self.created_at.strftime(" %H:%M %d/%m/%Y")}'
     
 class Item(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)

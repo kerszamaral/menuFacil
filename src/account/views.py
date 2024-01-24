@@ -27,11 +27,11 @@ def signup(request):
 
 @login_required(login_url="/account/login/")
 def index(request):
-    return render(request, 'account/index.html',  {'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
+    return render(request, 'account/index.html',  {'messages':get_messages(request), 'cart_length': Cart.get_length(request)})
 
 @login_required(login_url="/account/login/")
 def profile(request):
-    return render(request, 'account/profile.html', {'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
+    return render(request, 'account/profile.html', {'messages':get_messages(request), 'cart_length': Cart.get_length(request)})
 
 @login_required(login_url="/account/login/")
 def logout_view(request):
