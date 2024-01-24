@@ -1,5 +1,4 @@
 from typing import Any
-from urllib import request
 from uuid import UUID
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
@@ -7,8 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.contrib.messages import get_messages
 
-from cart.models import Cart
-from validation import cart_token_exists, CART_KEY
+from cart.models import get_cart_length
 
 from .models import Restaurant
 
@@ -22,14 +20,16 @@ class RestaurantsView(generic.ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         ctx = super().get_context_data(**kwargs)
-        ctx = {**ctx, 'cart_length': Cart.get_length(self.request)}
+        ctx = {**ctx, 'cart_length': get_cart_length(self.request)}
         return ctx
 
 
 def menu(request: HttpRequest, restaurant_id: UUID) -> HttpResponse:
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
-    ctx = {'restaurant': restaurant, 'messages':get_messages(request)}
-    ctx = {**ctx, 'cart_length': Cart.get_length(request)}
-        
+    ctx = {
+            'restaurant': restaurant,
+            'messages':get_messages(request),
+            'cart_length': get_cart_length(request)
+        }
+
     return render(request, 'restaurant/detail.html', ctx)
-        

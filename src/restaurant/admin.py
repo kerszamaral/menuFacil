@@ -7,8 +7,9 @@ from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
 from django_object_actions import DjangoObjectActions
 
+from order.models import Order
+from item.models import Item
 from .models import Restaurant, Menu, Food
-from order.models import Order, Item
 
 class LockedModel(object):
     def has_add_permission(self, request, obj=None) -> bool:
@@ -28,7 +29,7 @@ class EditLinkToInlineObject(object):
         url = reverse(f"admin:{instance._meta.app_label}_{instance._meta.model_name}_change",
                       args=[instance.pk] )
         if instance.pk:
-            return mark_safe(u'<a href="{u}">edit</a>'.format(u=url))
+            return mark_safe(f'<a href="{url}">edit</a>')
         else:
             return ''
 
@@ -49,15 +50,15 @@ class PermissionCheckModelAdmin(GuardedModelAdmin):
         actions = [action] if action else ['view', 'add', 'change', 'delete']
         klass = klass or opts.model
         model_name = klass._meta.model_name
-        return get_objects_for_user(user=request.user, 
-                                    perms=[f'{perm}_{model_name}' for perm in actions], 
+        return get_objects_for_user(user=request.user,
+                                    perms=[f'{perm}_{model_name}' for perm in actions],
                                     klass=klass, any_perm=True)
 
     def has_permission(self, request: HttpRequest, obj, action) -> bool:
         opts = self.opts
         code_name = f'{action}_{opts.model_name}'
         if obj:
-            return request.user.has_perm(f'{opts.app_label}.{code_name}', obj)
+            return request.user.has_perm(f'{opts.app_label}.{code_name}', obj) # type: ignore
         else:
             return self.get_model_objects(request).exists()
 
@@ -92,8 +93,8 @@ class ItemInline(LockedModel, admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
     inlines = [ItemInline]
-    readonly_fields = ('pending_cancellation', 'payed',
-                    #    'client', 
+    readonly_fields = ('pending_cancellation', 
+                       #'payed', 'client',
                        'total_price', 'created_at',
                        'updated_at')
 
@@ -104,14 +105,15 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin
             self.message_user(request, "Order cancelled")
         else:
             self.message_user(request, "Order not pending cancellation")
-            
+
     def approve_payment(self, request, obj):
-        if not obj.payed and not obj.status == Order.StatusType.OPEN and not obj.status == Order.StatusType.CANCELLED and not obj.pending_cancellation:
-            obj.payed = True
-            obj.save()
-            self.message_user(request, "Order payed")
-        else:
-            self.message_user(request, "Unable to pay order")
+        # if not obj.payed and not obj.status == Order.StatusType.OPEN and not obj.status == Order.StatusType.CANCELLED and not obj.pending_cancellation:
+        #     obj.payed = True
+        #     obj.save()
+        #     self.message_user(request, "Order payed")
+        # else:
+        #     self.message_user(request, "Unable to pay order")
+        pass
 
     change_actions = ('approve_cancellation', 'approve_payment')
 
@@ -120,8 +122,8 @@ class OrdersInline(LockedModel, admin.TabularInline):
     extra = 0
 
     can_delete = False
-    readonly_fields = ('pending_cancellation', 'payed',
-                    #    'client', 
+    readonly_fields = ('pending_cancellation', 
+                    #    'payed', 'client',
                        'total_price', 'created_at',
                        'updated_at', 'details_link')
 
@@ -135,7 +137,7 @@ class OrdersInline(LockedModel, admin.TabularInline):
         url = reverse(f"admin:{instance._meta.app_label}_{instance._meta.model_name}_change",
                       args=[instance.pk] )
         if instance.pk:
-            return mark_safe(u'<a href="{u}">details</a>'.format(u=url))
+            return mark_safe(f'<a href="{url}">edit</a>')
         else:
             return ''
 
@@ -144,7 +146,7 @@ class MakingOrdersInline(OrdersInline):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super(OrdersInline, self).get_queryset(request)
         qs = qs.exclude(status=Order.StatusType.OPEN
-              ).exclude(status=Order.StatusType.CANCELLED    
+              ).exclude(status=Order.StatusType.CANCELLED
               ).exclude(status=Order.StatusType.DELIVERED)
         return qs.order_by('-updated_at')
 

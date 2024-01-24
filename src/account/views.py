@@ -1,4 +1,3 @@
-from typing import Any
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
@@ -8,7 +7,7 @@ from django.views.generic.edit import DeleteView
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 
-from cart.models import Cart
+from cart.models import get_cart_length
 
 from .forms import NewUserForm
 
@@ -23,15 +22,33 @@ def signup(request):
             return redirect("home")
         messages.error(request, "Unsuccessful registration. Invalid information.")
     form = NewUserForm()
-    return render(request=request, template_name="account/signup.html", context={"register_form":form, 'messages':get_messages(request)})
+    return render(request=request,
+                  template_name="account/signup.html",
+                  context={
+                      "register_form":form,
+                      'messages':get_messages(request)
+                    }
+                )
 
 @login_required(login_url="/account/login/")
 def index(request):
-    return render(request, 'account/index.html',  {'messages':get_messages(request), 'cart_length': Cart.get_length(request)})
+    return render(request,
+                  'account/index.html',
+                  {
+                    'messages':get_messages(request),
+                    'cart_length': get_cart_length(request)
+                  }
+                )
 
 @login_required(login_url="/account/login/")
 def profile(request):
-    return render(request, 'account/profile.html', {'messages':get_messages(request), 'cart_length': Cart.get_length(request)})
+    return render(request,
+                  'account/profile.html', 
+                  {
+                    'messages':get_messages(request), 
+                    'cart_length': get_cart_length(request)
+                  }
+                )
 
 @login_required(login_url="/account/login/")
 def logout_view(request):
@@ -45,6 +62,6 @@ class UserDelete(DeleteView):
 
     def get_queryset(self):
         pk = self.kwargs.get(self.pk_url_kwarg)
-        if self.request.user.id == pk:
+        if self.request.user.id == pk: # type: ignore
             return super().get_queryset()
         return super().get_queryset().none()

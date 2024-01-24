@@ -11,7 +11,7 @@ def cart_token_exists(request: HttpRequest) -> bool:
         return True
 
     if request.user.is_authenticated:
-        cart = request.user.cart_set.all().first()
+        cart = request.user.cart # type: ignore
         request.session[CART_KEY] = cart.id
         return True
 
@@ -22,7 +22,7 @@ def tab_token_exists(request: HttpRequest) -> bool:
         return True
 
     if request.user.is_authenticated:
-        tab = request.user.tab_set.all().first()
+        tab = request.user.tab # type: ignore
         request.session[TAB_KEY] = tab.id
         return True
 

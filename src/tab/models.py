@@ -1,21 +1,19 @@
 from io import BytesIO
 from uuid import uuid4
 from django.db import models
-from django.urls import reverse
+from django.core.files import File
+from django.conf import settings
 import qrcode
 from PIL import Image
-from django.core.files import File
-
-from django.conf import settings
 
 class Tab(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True, editable=False)
-    client = models.ForeignKey(
+    client = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         editable=False,
-        blank=True
+        null=True,
     )
 
     def save(self, *args, **kwargs):
@@ -25,6 +23,6 @@ class Tab(models.Model):
         file_name = f'qr_code_{self.id}.png'
         stream = BytesIO()
         canvas.save(stream, 'PNG')
-        self.qr_code.save(file_name, File(stream), save=False)
+        self.qr_code.save(file_name, File(stream), save=False) # pylint: disable=E1101
         canvas.close()
         super().save(*args, **kwargs)

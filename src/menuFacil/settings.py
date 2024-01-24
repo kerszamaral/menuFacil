@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o8aig&r!1tkp^60$6y%fnq6((q%z-v(d2-r6bs0psa2^)#(m5m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "order.apps.OrderConfig",
     "account.apps.AccountConfig",
     "tab.apps.TabConfig",
+    "item.apps.ItemConfig",
     'guardian',
     'crispy_forms',
     'crispy_bootstrap4',

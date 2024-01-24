@@ -3,24 +3,41 @@ from django.db import models
 
 from django.conf import settings
 from django.http import HttpRequest
+from restaurant.models import Restaurant
 
-from restaurant.models import Food
-from validation import CART_KEY, cart_token_exists
+from menuFacil.validation import CART_KEY, cart_token_exists
 
 # Create your models here.
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True)
+    client = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=True, null=True
+    )
+    restaurant = models.ForeignKey(
+            Restaurant,
+            on_delete=models.SET_NULL,
+            null=True
+        )
 
-    def get_length(request: HttpRequest) -> int:
-        if cart_token_exists(request):
-            cart = Cart.objects.get(id=request.session[CART_KEY])
-            return sum(item.quantity for item in Item.objects.filter(cart=cart))
+    def get_length(self) -> int:
+        return sum(item.quantity for item in self.item_set.all()) # type: ignore
+
+    def get_total_price(self) -> float:
+        return sum(item.price for item in self.item_set.all()) # type: ignore
+
+
+def get_cart_length(request: HttpRequest) -> int:
+    if not cart_token_exists(request):
         return 0
 
-class Item(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    food = models.ForeignKey(Food, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    cart = Cart.objects.get(id=request.session[CART_KEY])
+    return cart.get_length()
+
+def get_cart_total_price(request: HttpRequest) -> float:
+    if not cart_token_exists(request):
+        return 0
+
+    cart = Cart.objects.get(id=request.session[CART_KEY])
+    return cart.get_total_price()
