@@ -1,3 +1,4 @@
+from http import client
 from uuid import UUID
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -11,6 +12,13 @@ from validation import cart_token_exists, CART_KEY, CART_REDIRECT_URL
 from .models import Item, Cart
 
 # Create your views here.
+def create_cart(request: HttpRequest) -> HttpResponse:
+    cart = Cart.objects.create(
+        client=request.user if request.user.is_authenticated else None
+    )
+    request.session[CART_KEY] = cart.id
+    return redirect('home')
+
 def add_to_cart(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> HttpResponse:
     if not cart_token_exists(request):
         return redirect(CART_REDIRECT_URL)
@@ -32,6 +40,7 @@ def add_to_cart(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> Htt
     cart_item.save()
     messages.success(request, 'Item added to cart')
     return HttpResponseRedirect(reverse('restaurant:detail', args=(restaurant_id,UUID)))
+    # return redirect('restaurant:detail', args=(restaurant_id,UUID))
 
 def increase_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
     if not cart_token_exists(request):
