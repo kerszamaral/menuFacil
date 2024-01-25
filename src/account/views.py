@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth import login, logout
@@ -31,22 +32,22 @@ def signup(request):
                 )
 
 @login_required(login_url="/account/login/")
-def index(request):
+def index(request: HttpRequest):
     return render(request,
                   'account/index.html',
                   {
                     'messages':get_messages(request),
-                    'cart_length': get_cart_length(request)
+                    'cart_length': get_cart_length(request.session, request.user)
                   }
                 )
 
 @login_required(login_url="/account/login/")
-def profile(request):
+def profile(request: HttpRequest):
     return render(request,
                   'account/profile.html', 
                   {
                     'messages':get_messages(request), 
-                    'cart_length': get_cart_length(request)
+                    'cart_length': get_cart_length(request.session, request.user)
                   }
                 )
 

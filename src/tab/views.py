@@ -8,7 +8,7 @@ from menuFacil.validation import TAB_KEY, TAB_REDIRECT_URL, tab_token_exists
 
 # Create your views here.
 def list_orders_in_tab(request: HttpRequest) -> HttpResponse:
-    if not tab_token_exists(request):
+    if not tab_token_exists(request.session, request.user):
         return redirect(TAB_REDIRECT_URL)
 
     tab = Tab.objects.get(id=request.session[TAB_KEY])
@@ -17,7 +17,7 @@ def list_orders_in_tab(request: HttpRequest) -> HttpResponse:
     ctx = {
             'orders': orders,
             'messages':get_messages(request),
-            'cart_length': get_cart_length(request)
+            'cart_length': get_cart_length(request.session, request.user)
         }
 
     return render(request, 'order/list.html', ctx)

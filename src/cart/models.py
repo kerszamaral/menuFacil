@@ -1,8 +1,9 @@
 from uuid import uuid4
 from django.db import models
 
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
+from django.contrib.sessions.backends.base import SessionBase
 from django.conf import settings
-from django.http import HttpRequest
 from restaurant.models import Restaurant
 
 from menuFacil.validation import CART_KEY, cart_token_exists
@@ -28,16 +29,16 @@ class Cart(models.Model):
         return sum(item.price for item in self.item_set.all()) # type: ignore
 
 
-def get_cart_length(request: HttpRequest) -> int:
-    if not cart_token_exists(request):
+def get_cart_length(session: SessionBase, user: AbstractBaseUser | AnonymousUser) -> int:
+    if not cart_token_exists(session, user):
         return 0
 
-    cart = Cart.objects.get(id=request.session[CART_KEY])
+    cart = Cart.objects.get(id=session[CART_KEY])
     return cart.get_length()
 
-def get_cart_total_price(request: HttpRequest) -> float:
-    if not cart_token_exists(request):
+def get_cart_total_price(session: SessionBase, user: AbstractBaseUser | AnonymousUser) -> float:
+    if not cart_token_exists(session, user):
         return 0
 
-    cart = Cart.objects.get(id=request.session[CART_KEY])
+    cart = Cart.objects.get(id=session[CART_KEY])
     return cart.get_total_price()

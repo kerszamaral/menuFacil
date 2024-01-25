@@ -10,9 +10,9 @@ from .models import Order
 
 # Create your views here.
 def create_order(request: HttpRequest) -> HttpResponse:
-    if not cart_token_exists(request):
+    if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
-    if not tab_token_exists(request):
+    if not tab_token_exists(request.session, request.user):
         return redirect(TAB_REDIRECT_URL)
 
     cart = Cart.objects.get(id=request.session[CART_KEY])
@@ -39,7 +39,7 @@ def create_order(request: HttpRequest) -> HttpResponse:
     return render(request, 'order/validate.html') #! Change from validate
 
 def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    if not cart_token_exists(request):
+    if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     order = get_object_or_404(Order, id=order_id)

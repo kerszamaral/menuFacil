@@ -19,7 +19,7 @@ def create_cart(request: HttpRequest) -> HttpResponse:
     return redirect('home')
 
 def add_to_cart(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> HttpResponse:
-    if not cart_token_exists(request):
+    if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     cart = Cart.objects.get(id=request.session[CART_KEY])
@@ -30,7 +30,8 @@ def add_to_cart(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> Htt
         messages.error(request, 'Cannot add items from multiple restaurant to cart')
         return redirect('restaurant:detail', args=(restaurant_id,UUID))
 
-    item: Item = cart.item_set.get(food_id=food_id) # type: ignore
+    # We use filter and first because if it doesn't find it returns None
+    item: Item = cart.item_set.filter(food_id=food_id).first() # type: ignore
 
     if item:
         item.quantity += 1
@@ -43,10 +44,10 @@ def add_to_cart(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> Htt
     item.price = item.food.price * item.quantity
     item.save()
     messages.success(request, 'Item added to cart')
-    return redirect('restaurant:detail', args=(restaurant_id,UUID))
+    return redirect('restaurant:detail', restaurant_id=restaurant_id)
 
 def increase_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
-    if not cart_token_exists(request):
+    if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     cart_item = get_object_or_404(Item, cart_id=request.session[CART_KEY], food_id=food_id)
@@ -57,7 +58,7 @@ def increase_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
     return redirect("cart:cart_detail")
 
 def decrease_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
-    if not cart_token_exists(request):
+    if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     cart_item = get_object_or_404(Item, cart_id=request.session[CART_KEY], food_id=food_id)
@@ -72,7 +73,7 @@ def decrease_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
     return redirect("cart:cart_detail")
 
 def remove_from_cart(request: HttpRequest, food_id: UUID) -> HttpResponse:
-    if not cart_token_exists(request):
+    if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     cart_item = get_object_or_404(Item, cart_id=request.session[CART_KEY], food_id=food_id)
@@ -82,7 +83,7 @@ def remove_from_cart(request: HttpRequest, food_id: UUID) -> HttpResponse:
     return redirect("cart:cart_detail")
 
 def cart_detail(request: HttpRequest) -> HttpResponse:
-    if not cart_token_exists(request):
+    if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     cart = Cart.objects.get(id=request.session[CART_KEY])

@@ -24,17 +24,16 @@
               <a href="{% url 'admin:index' %}">Admin</a>
             {% endif %}
             <a href="{% url 'account:profile' %}">Account: {{ user.username }}</a>
+            {% comment %} <a href="{% url 'order:list_orders' %}">My orders</a> {% endcomment %}
+          {% else %}
+            <a href="{% url 'account:login' %}">Log In</a>
+            <a href="{% url 'account:signup' %}">Sign Up</a>
+          {% endif %}
             <a href="{% url 'cart:cart_detail' %}">
               Cart {% if cart_length %}
                 ({{ cart_length }})
               {% endif %}
             </a>
-
-            <a href="{% url 'order:list_orders' %}">My orders</a>
-          {% else %}
-            <a href="{% url 'account:login' %}">Log In</a>
-            <a href="{% url 'account:signup' %}">Sign Up</a>
-          {% endif %}
         </div>
         <div class="messages">
           {% if messages %}

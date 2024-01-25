@@ -20,7 +20,7 @@ class RestaurantsView(generic.ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         ctx = super().get_context_data(**kwargs)
-        ctx = {**ctx, 'cart_length': get_cart_length(self.request)}
+        ctx['cart_length'] = get_cart_length(self.request.session, self.request.user)
         return ctx
 
 
@@ -29,7 +29,7 @@ def menu(request: HttpRequest, restaurant_id: UUID) -> HttpResponse:
     ctx = {
             'restaurant': restaurant,
             'messages':get_messages(request),
-            'cart_length': get_cart_length(request)
+            'cart_length': get_cart_length(request.session, request.user)
         }
 
     return render(request, 'restaurant/detail.html', ctx)
