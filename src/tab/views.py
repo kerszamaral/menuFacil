@@ -21,3 +21,6 @@ def list_orders_in_tab(request: HttpRequest) -> HttpResponse:
         }
 
     return render(request, 'order/list.html', ctx)
+
+def present_tab(request: HttpRequest):
+    return render(request, 'tab/present.html')

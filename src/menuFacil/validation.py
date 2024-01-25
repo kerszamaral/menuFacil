@@ -22,11 +22,11 @@ def cart_token_exists(session: SessionBase, user: AbstractBaseUser | AnonymousUs
     return True
 
 def tab_token_exists(session: SessionBase, user: AbstractBaseUser | AnonymousUser) -> bool:
-    if TAB_KEY in session.keys():
-        return True
-
     if user.is_authenticated:
         session[TAB_KEY] = str(user.tab.id) # type: ignore
+        return True
+
+    if TAB_KEY in session.keys():
         return True
 
     return False

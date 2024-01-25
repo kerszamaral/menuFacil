@@ -165,3 +165,7 @@ cython_debug/
 
 # Media
 src/media
+
+# SSL
+cert.crt
+cert.key
