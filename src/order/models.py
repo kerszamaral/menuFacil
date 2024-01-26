@@ -28,5 +28,11 @@ class Order(models.Model):
         default=StatusType.OPEN,
     )
 
+    def get_length(self) -> int:
+        return sum(item.quantity for item in self.item_set.all()) # type: ignore
+
+    def get_total_price(self) -> float:
+        return sum(item.get_total_item_price() for item in self.item_set.all()) # type: ignore
+
     def __str__(self):
         return f'{self.tab.id} - {self.total_price} - {self.created_at.strftime(" %H:%M %d/%m/%Y")}'  # pylint: disable=maybe-no-member

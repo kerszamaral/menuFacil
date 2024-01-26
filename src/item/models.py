@@ -19,6 +19,6 @@ class Item(models.Model):
                                             decimal_places=2,
                                             default=0.00 # type: ignore
                                         )
-    
+
     def get_total_item_price(self) -> Decimal:
         return self.quantity * self.price

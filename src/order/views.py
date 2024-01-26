@@ -34,20 +34,21 @@ def create_order(request: HttpRequest) -> HttpResponse:
     for item in cart.item_set.all(): # type: ignore
         item.order = order
         item.cart = None
+        item.save()
 
     cart.restaurant = None
+    cart.save()
     return redirect('tab:index')
 
 def list_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = Order.objects.get(id= order_id)
-    cart = Cart.objects.get(id=request.session[CART_KEY])
-    itens = Item.objects.filter(cart=cart)
+    order = Order.objects.get(id=order_id)
+    itens = Item.objects.filter(order=order)
     ctx = {
             'order': order,
             'itens': itens,
             "open": Order.StatusType.OPEN,
         }
-    
+
     return render(request, 'order/list.html', ctx)
 
 def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:

@@ -41,7 +41,7 @@ def add_to_cart(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> Htt
             order=None
         )
 
-    item.price = item.food.price * item.quantity
+    item.price = item.food.price
     item.save()
     messages.success(request, 'Item added to cart')
     return redirect('restaurant:detail', restaurant_id=restaurant_id)
@@ -52,7 +52,6 @@ def increase_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
 
     cart_item = get_object_or_404(Item, cart_id=request.session[CART_KEY], food_id=food_id)
     cart_item.quantity += 1
-    cart_item.price = cart_item.food.price * cart_item.quantity
     cart_item.save()
     messages.success(request, 'Item quantity increased')
     return redirect("cart:cart_detail")
@@ -64,7 +63,6 @@ def decrease_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
     cart_item = get_object_or_404(Item, cart_id=request.session[CART_KEY], food_id=food_id)
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
-        cart_item.price = cart_item.food.price * cart_item.quantity
         cart_item.save()
         messages.success(request, 'Item quantity decreased')
     else:
