@@ -1,3 +1,4 @@
+import uuid
 from django.apps import apps
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
@@ -30,3 +31,10 @@ def tab_token_exists(session: SessionBase, user: AbstractBaseUser | AnonymousUse
         return True
 
     return False
+
+def validate_UUID(uuid_to_test: str) -> bool:
+    try:
+        uuid.UUID(uuid_to_test)
+        return True
+    except ValueError:
+        return False
