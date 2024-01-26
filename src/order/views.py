@@ -1,6 +1,6 @@
 from uuid import UUID
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 
 from item.models import Item
 from cart.models import Cart
@@ -39,17 +39,6 @@ def create_order(request: HttpRequest) -> HttpResponse:
     cart.restaurant = None
     cart.save()
     return redirect('tab:index')
-
-def list_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = Order.objects.get(id=order_id)
-    itens = Item.objects.filter(order=order)
-    ctx = {
-            'order': order,
-            'itens': itens,
-            "open": Order.StatusType.OPEN,
-        }
-
-    return render(request, 'order/list.html', ctx)
 
 def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):

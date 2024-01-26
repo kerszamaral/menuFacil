@@ -5,15 +5,15 @@
 
 {% block head %}
     <link rel="stylesheet" href="{% static 'restaurant/css/index.css' %}" />
+    {% comment %}! Doesn't work for some reason? {% endcomment %}
+    {% comment %} <script type="text/javascript" src="{% static 'tab/instascan.min.js' %}"></script> {% endcomment %}
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 {% endblock %}
 
 
 {% block content%}
 <div>
-  {% comment %}! Doesn't work for some reason? {% endcomment %}
-  {% comment %} <script type="text/javascript" src="{% static 'tab/instascan.min.js' %}"></script> {% endcomment %}
-  <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <div class="col-sm-12">
     <video id="preview" class="camera_scan"></video>
   </div>

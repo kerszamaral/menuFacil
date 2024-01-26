@@ -13,10 +13,10 @@ def list_orders_in_tab(request: HttpRequest) -> HttpResponse:
 
     tab = Tab.objects.get(id=request.session[TAB_KEY])
     orders = tab.order_set.all() # type: ignore
-    orders = orders.order_by('-created_at')
+    orders = orders.order_by('-created_at').reverse()
     ctx = {
             'orders': orders,
-            'messages':get_messages(request),
+            'messages': get_messages(request),
             'cart_length': get_cart_length(request.session, request.user)
         }
 

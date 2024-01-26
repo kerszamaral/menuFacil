@@ -1,29 +1,108 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Your Tab{% endblock %}
+{% block title %}
+  Your Tab
+{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'tab/details.css' %}" />
+  <link rel="stylesheet" href="{% static 'tab/css/details.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
 {% endblock %}
 
 {% block content %}
-
-<div class = "comanda">
+  <div class="comanda">
     <h1>Your Tab</h1>
     {% if orders %}
-        {% for order in orders %}
-            <div class="comanda-container">
-                <div class="comanda-subcontainer">
-                    <h2>Order {{forloop.counter}}</h2>
-                    <a href="{% url 'order:list_order' order.id %}">View Order Details</a>
-                    <a href="{% url 'order:cancel_order' order.id %}">Cancel Order</a>
-                </div>
-            </div>
-        {% endfor %}
+      <div class="button">
         <a href="">Pay Tab</a>
+      </div>
+      <p></p>
+      {% for order in orders %}
+        <button class="accordion">
+          <p>Order #{{ forloop.counter }}</p>
+          <p>Status: {{ order.get_status_display }}</p>
+          <p>Price: {{ order.total_price }}</p>
+        </button>
+        <div class="accordion-content">
+          <div class="container">
+            <div class="details">
+              <table>
+                <tr>
+                  <td>Order Date:</td>
+                  <td>{{ order.created_at|date:'d/m/Y H:i' }}</td>
+                </tr>
+                <tr>
+                  <td>Last Updated:</td>
+                  <td>{{ order.updated_at|date:'d/m/Y H:i' }}</td>
+                </tr>
+              </table>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order.item_set.all %}
+                  <tr>
+                    <td>{{ item.food }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.get_total_price }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2"></td>
+                  <td>Total:</td>
+                  <td>{{ order.total_price }}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div class="buttons">
+              {% if order.status == 'OP' or order.status == 'MD' or order.status == 'IP' %}
+                {% if not order.pending_cancellation and not order.payed %}
+                  <div class="button-danger">
+                    <a href="{% url 'order:cancel_order' order.id %}" c>Cancel Order</a>
+                  </div>
+                {% endif %}
+                {% if order.pending_cancellation %}
+                    <h4>Cancelation Requested</h4>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     {% else %}
-        <p>Your Tab is empty.</p>
+      <p>Your Tab is empty.</p>
     {% endif %}
-</div>
+  </div>
+
+  <script>
+    var accordions = document.getElementsByClassName('accordion')
+    
+    for (var i = 0; i < accordions.length; i++) {
+      accordions[i].onclick = function () {
+        this.classList.toggle('is-open')
+    
+        var content = this.nextElementSibling
+        if (content.style.maxHeight) {
+          // accordion is currently open, so close it
+          content.style.maxHeight = null
+        } else {
+          // accordion is currently closed, so open it
+          content.style.maxHeight = content.scrollHeight + 'px'
+        }
+      }
+    }
+  </script>
 {% endblock %}
