@@ -36,7 +36,19 @@ def create_order(request: HttpRequest) -> HttpResponse:
         item.cart = None
 
     cart.restaurant = None
-    return render(request, 'order/validate.html') #! Change from validate
+    return redirect('tab:index') #! Change from validate
+
+def list_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
+    order = Order.objects.get(id= order_id)
+    cart = Cart.objects.get(id=request.session[CART_KEY])
+    itens = Item.objects.filter(cart=cart)
+    ctx = {
+            'order': order,
+            'itens': itens,
+            "open": Order.StatusType.OPEN,
+        }
+    
+    return render(request, 'order/list.html', ctx)
 
 def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):
@@ -45,4 +57,4 @@ def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
     order.pending_cancellation = True
     order.save()
-    return redirect('order:list_orders') #! Change from list orders
+    return redirect('tab:index') #! Pensar numa tela melhor para redirecionar

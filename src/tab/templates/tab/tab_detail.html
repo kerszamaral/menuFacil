@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Your Tab{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'cart/css/style.css' %}" />
+{% endblock %}
+
+{% block content %}
+
+<div class = "comanda">
+    <h1>Your Tab</h1>
+    {% if orders %}
+        {% for order in orders %}
+            <div class="comanda-container">
+                <div class="comanda-subcontainer">
+                    <a href="{% url 'order:list_order' order.id %}">Pedido {{forloop.counter}}</a>
+                    <a href="{% url 'order:cancel_order' order.id %}">Cancel Order</a>
+                </div>
+            </div>
+        {% endfor %}
+        <a href="">Pay Tab</a>
+    {% else %}
+        <p>Your shopping cart is empty.</p>
+    {% endif %}
+</div>
+{% endblock %}

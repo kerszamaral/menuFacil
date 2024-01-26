@@ -20,7 +20,9 @@ def list_orders_in_tab(request: HttpRequest) -> HttpResponse:
             'cart_length': get_cart_length(request.session, request.user)
         }
 
-    return render(request, 'order/list.html', ctx)
+    return render(request, 'tab/tab_detail.html', ctx)
 
 def present_tab(request: HttpRequest):
     return render(request, 'tab/present.html')
+
+# def pay_tab():

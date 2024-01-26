@@ -74,6 +74,7 @@ class PermissionCheckModelAdmin(GuardedModelAdmin):
 # Register your models here.
 class FoodInline(admin.TabularInline):
     model = Food
+    list_display = ('name', 'price')
     extra = 1
 
 @admin.register(Menu)
@@ -82,7 +83,6 @@ class MenuAdmin(HiddenModel, admin.ModelAdmin):
     list_display = ('restaurant', 'name')
     list_filter = ['restaurant']
     search_fields = ['name']
-
 
 class ItemInline(LockedModel, admin.TabularInline):
     model = Item
@@ -161,3 +161,7 @@ class RestaurantAdmin(PermissionCheckModelAdmin):
         (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
     inlines = [MenuInline, MakingOrdersInline, OrdersInline]
+
+@admin.register(Food)
+class FoodAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price')

@@ -1,0 +1,10 @@
+.comanda-container {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.comanda-subcontainer {
+    display:flex;
+    align-items: center;
+}
