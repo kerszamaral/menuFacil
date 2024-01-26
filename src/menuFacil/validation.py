@@ -5,7 +5,7 @@ from django.contrib.sessions.backends.base import SessionBase
 CART_KEY = 'cart_token'
 TAB_KEY = 'tab_token'
 CART_REDIRECT_URL = "cart:create"
-TAB_REDIRECT_URL = "BBBB"
+TAB_REDIRECT_URL = "tab:present"
 
 
 def cart_token_exists(session: SessionBase, user: AbstractBaseUser | AnonymousUser) -> bool:

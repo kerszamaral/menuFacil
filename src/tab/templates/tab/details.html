@@ -4,7 +4,7 @@
 {% block title %}Your Tab{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'cart/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'tab/details.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -15,7 +15,8 @@
         {% for order in orders %}
             <div class="comanda-container">
                 <div class="comanda-subcontainer">
-                    <a href="{% url 'order:list_order' order.id %}">Pedido {{forloop.counter}}</a>
+                    <h2>Order {{forloop.counter}}</h2>
+                    <a href="{% url 'order:list_order' order.id %}">View Order Details</a>
                     <a href="{% url 'order:cancel_order' order.id %}">Cancel Order</a>
                 </div>
             </div>
