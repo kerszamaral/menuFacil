@@ -161,7 +161,3 @@ class RestaurantAdmin(PermissionCheckModelAdmin):
         (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
     inlines = [MenuInline, MakingOrdersInline, OrdersInline]
-
-@admin.register(Food)
-class FoodAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price')

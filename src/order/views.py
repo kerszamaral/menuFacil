@@ -36,7 +36,7 @@ def create_order(request: HttpRequest) -> HttpResponse:
         item.cart = None
 
     cart.restaurant = None
-    return redirect('tab:index') #! Change from validate
+    return redirect('tab:index')
 
 def list_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = Order.objects.get(id= order_id)
@@ -57,4 +57,4 @@ def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
     order = get_object_or_404(Order, id=order_id)
     order.pending_cancellation = True
     order.save()
-    return redirect('tab:index') #! Pensar numa tela melhor para redirecionar
+    return redirect('tab:index')
