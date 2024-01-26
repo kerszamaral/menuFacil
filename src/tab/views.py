@@ -1,13 +1,12 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.contrib.messages import get_messages
 from cart.models import get_cart_length
 
 from tab.models import Tab
 from menuFacil.validation import TAB_KEY, TAB_REDIRECT_URL, tab_token_exists, validate_UUID
 
 # Create your views here.
-def list_orders_in_tab(request: HttpRequest) -> HttpResponse:
+def details(request: HttpRequest) -> HttpResponse:
     if not tab_token_exists(request.session, request.user):
         return redirect(TAB_REDIRECT_URL)
 
@@ -16,13 +15,12 @@ def list_orders_in_tab(request: HttpRequest) -> HttpResponse:
     orders = orders.order_by('-created_at').reverse()
     ctx = {
             'orders': orders,
-            'messages': get_messages(request),
             'cart_length': get_cart_length(request.session, request.user)
         }
 
     return render(request, 'tab/details.html', ctx)
 
-def present_tab(request: HttpRequest):
+def present(request: HttpRequest):
     if request.method == "POST":
         if not validate_UUID(request.POST['data']):
             response = JsonResponse({"success": False})

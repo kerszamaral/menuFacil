@@ -2,7 +2,6 @@ from uuid import UUID
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpRequest, HttpResponse
 from django.contrib import messages
-from django.contrib.messages import get_messages
 from restaurant.models import Food, Restaurant
 
 from menuFacil.validation import cart_token_exists, CART_KEY, CART_REDIRECT_URL
@@ -11,14 +10,14 @@ from item.models import Item
 from .models import Cart
 
 # Create your views here.
-def create_cart(request: HttpRequest) -> HttpResponse:
+def create(request: HttpRequest) -> HttpResponse:
     cart = Cart.objects.create(
         client=request.user if request.user.is_authenticated else None
     )
     request.session[CART_KEY] = cart.id
     return redirect('home')
 
-def add_to_cart(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> HttpResponse:
+def add(request: HttpRequest, restaurant_id: UUID, food_id: UUID) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
@@ -54,7 +53,7 @@ def increase_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
     cart_item.quantity += 1
     cart_item.save()
     messages.success(request, 'Item quantity increased')
-    return redirect("cart:cart_detail")
+    return redirect("cart:details")
 
 def decrease_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):
@@ -68,9 +67,9 @@ def decrease_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
     else:
         cart_item.delete()
         messages.success(request, 'Item removed from cart')
-    return redirect("cart:cart_detail")
+    return redirect("cart:details")
 
-def remove_from_cart(request: HttpRequest, food_id: UUID) -> HttpResponse:
+def remove(request: HttpRequest, food_id: UUID) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
@@ -78,19 +77,17 @@ def remove_from_cart(request: HttpRequest, food_id: UUID) -> HttpResponse:
 
     cart_item.delete()
     messages.success(request, 'Item removed from cart')
-    return redirect("cart:cart_detail")
+    return redirect("cart:details")
 
-def cart_detail(request: HttpRequest) -> HttpResponse:
+def details(request: HttpRequest) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     cart = Cart.objects.get(id=request.session[CART_KEY])
 
     context = {
-        'cart_items': cart.item_set.all(), # type: ignore
-        'total_price': cart.get_total_price(),
-        'messages':get_messages(request),
+        'cart': cart,
         'cart_length': cart.get_length()
     }
 
-    return render(request, 'cart/cart_detail.html', context)
+    return render(request, 'cart/details.html', context)

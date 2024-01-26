@@ -9,7 +9,7 @@ from menuFacil.validation import cart_token_exists, tab_token_exists, CART_KEY, 
 from .models import Order
 
 # Create your views here.
-def create_order(request: HttpRequest) -> HttpResponse:
+def create(request: HttpRequest) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
     if not tab_token_exists(request.session, request.user):
@@ -38,13 +38,13 @@ def create_order(request: HttpRequest) -> HttpResponse:
 
     cart.restaurant = None
     cart.save()
-    return redirect('tab:index')
+    return redirect('tab:details')
 
-def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
+def cancel(request: HttpRequest, order_id: UUID) -> HttpResponse:
     if not cart_token_exists(request.session, request.user):
         return redirect(CART_REDIRECT_URL)
 
     order = get_object_or_404(Order, id=order_id)
     order.pending_cancellation = True
     order.save()
-    return redirect('tab:index')
+    return redirect('tab:details')

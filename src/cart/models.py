@@ -26,7 +26,7 @@ class Cart(models.Model):
         return sum(item.quantity for item in self.item_set.all()) # type: ignore
 
     def get_total_price(self) -> float:
-        return sum(item.get_total_item_price() for item in self.item_set.all()) # type: ignore
+        return sum(item.get_total_price() for item in self.item_set.all()) # type: ignore
 
 
 def get_cart_length(session: SessionBase, user: AbstractBaseUser | AnonymousUser) -> int:

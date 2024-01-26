@@ -10,7 +10,7 @@
 {% block content %}
 
 <div class = "carrinho">
-    {% if cart_items %}
+    {% if cart.item_set.count > 0 %}
         <table class="table">
             <thead>
                 <tr>
@@ -22,7 +22,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in cart_items %}
+                {% for item in cart.item_set.all %}
                     <tr>
                         <td>{{ item.food }}</td>
                         <td>
@@ -32,16 +32,16 @@
                         </td>
                         <td>{{ item.price }}</td>
                         <td>{{ item.get_total_price  }}</td>
-                        <td><a href="{% url 'cart:remove_from_cart' item.food.id %}">Remove</a></td>
+                        <td><a href="{% url 'cart:remove' item.food.id %}">Remove</a></td>
                     </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr>
-                    <td><a href="{% url 'order:create_order' %}" class="btn btn-primary">Checkout</a></td>
+                    <td><a href="{% url 'order:create' %}" class="btn btn-primary">Checkout</a></td>
                     <td colspan="2"></td>
                     <td>Total:</td>
-                    <td>{{ total_price }}</td>
+                    <td>{{ cart.get_total_price }}</td>
                 </tr>
             </tfoot>
         </table>

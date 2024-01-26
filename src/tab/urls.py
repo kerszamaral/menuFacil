@@ -4,6 +4,6 @@ from . import views
 
 app_name = 'tab'
 urlpatterns = [
-    path('', views.list_orders_in_tab, name='index'),
-    path('present/', views.present_tab, name='present'),
+    path('', views.details, name='details'),
+    path('present/', views.present, name='present'),
 ]

@@ -71,7 +71,7 @@
               {% if order.status == 'OP' or order.status == 'MD' or order.status == 'IP' %}
                 {% if not order.pending_cancellation and not order.payed %}
                   <div class="button-danger">
-                    <a href="{% url 'order:cancel_order' order.id %}" c>Cancel Order</a>
+                    <a href="{% url 'order:cancel' order.id %}" c>Cancel Order</a>
                   </div>
                 {% endif %}
                 {% if order.pending_cancellation %}

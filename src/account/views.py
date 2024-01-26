@@ -6,14 +6,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import DeleteView
 from django.contrib.auth import get_user_model
-from django.contrib.messages import get_messages
 
 from cart.models import get_cart_length
 
 from .forms import NewUserForm
 
 # Create your views here.
-def signup(request):
+def signup(request: HttpRequest):
     if request.method == "POST":
         form = NewUserForm(request.POST)
         if form.is_valid():
@@ -27,7 +26,7 @@ def signup(request):
                   template_name="account/signup.html",
                   context={
                       "register_form":form,
-                      'messages':get_messages(request)
+                      'cart_length': get_cart_length(request.session, request.user)
                     }
                 )
 
@@ -36,7 +35,6 @@ def index(request: HttpRequest):
     return render(request,
                   'account/index.html',
                   {
-                    'messages':get_messages(request),
                     'cart_length': get_cart_length(request.session, request.user)
                   }
                 )
@@ -46,7 +44,6 @@ def profile(request: HttpRequest):
     return render(request,
                   'account/profile.html', 
                   {
-                    'messages':get_messages(request), 
                     'cart_length': get_cart_length(request.session, request.user)
                   }
                 )

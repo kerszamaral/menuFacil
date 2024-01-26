@@ -20,7 +20,7 @@
           {% for food in menu.food_set.all %}
             <div class="container">
               {% if not food.hidden %}
-                <a href="{% url 'cart:add_to_cart' restaurant.id food.id %}">
+                <a href="{% url 'cart:add' restaurant.id food.id %}">
                   {% if food.photo %}
                     <img src="{{ food.photo.url }}" alt="{{ food.name }}" />
                   {% endif %}
