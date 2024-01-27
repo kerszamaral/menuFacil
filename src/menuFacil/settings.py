@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_object_actions',
     'django_extensions',
     'qr_code',
+    'creditcards',
 ]
 
 MIDDLEWARE = [

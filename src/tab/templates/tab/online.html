@@ -10,13 +10,12 @@
 {% endblock %}
 
 {% block content %}
-  <div class="comanda">
-    {% if tab_id %}
-      <div class="button">
-        <a href="{% url 'tab:payed' %}">Pay</a>
-      </div>
-    {% else %}
-      <h1>There is no tab to pay</h1>
-    {% endif %}
+{% load crispy_forms_tags %}
+  <div class="form">
+    <form method="POST">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-primary">Pay</button>
+    </form>
   </div>
 {% endblock %}
