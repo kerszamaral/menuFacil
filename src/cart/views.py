@@ -96,9 +96,4 @@ def details(request: HttpRequest) -> HttpResponse:
     if created:
         request.session[CART_KEY] = str(cart.id)
 
-    context = {
-        'cart': cart,
-        'cart_length': cart.get_length()
-    }
-
-    return render(request, 'cart/details.html', context)
+    return render(request, 'cart/details.html', {'cart': cart})

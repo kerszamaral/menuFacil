@@ -2,7 +2,6 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from cart.models import get_cart_length
 
 from tab.models import HistoricTab, Tab
 from menuFacil.validation import TAB_KEY, TAB_REDIRECT_URL, tab_token_exists, validate_UUID, post_contains_keys
@@ -17,7 +16,6 @@ def details(request: HttpRequest) -> HttpResponse:
     orders = orders.order_by('-created_at').reverse()
     ctx = {
             'orders': orders,
-            'cart_length': get_cart_length(request.session, request.user),
             'tab': tab,
         }
 
@@ -25,10 +23,7 @@ def details(request: HttpRequest) -> HttpResponse:
 
 def present(request: HttpRequest) -> HttpResponse:
     if request.method != "POST":
-        ctx = {
-            'cart_length': get_cart_length(request.session, request.user)
-        }
-        return render(request, 'tab/present.html', ctx)
+        return render(request, 'tab/present.html')
 
     if not post_contains_keys(request.POST, ['tab']) or \
        not validate_UUID(request.POST['tab']) or \
@@ -42,10 +37,9 @@ def present(request: HttpRequest) -> HttpResponse:
 @login_required(login_url="/account/login/")
 def history(request: HttpRequest) -> HttpResponse:
     ctx = {
-            'historic_tabs': HistoricTab.objects.filter(client=request.user).order_by('-created_at').reverse(),
-            'cart_length': get_cart_length(request.session, request.user)
+            'historic_tabs': HistoricTab.objects.filter(client=request.user).order_by('-created_at').reverse()
         }
-    
+
     return render(request, 'tab/history.html', ctx)
 
 @require_POST
@@ -54,18 +48,21 @@ def payed(request: HttpRequest) -> HttpResponse:
         return JsonResponse({"success": False}, status=400)
 
     tab = get_object_or_404(Tab, id=request.POST['tab'])
-    if tab.client is not None:
-        historic = HistoricTab.objects.create(
-            client=tab.client
-        )
-        for order in tab.order_set.all(): # type: ignore
-            historic.order_set.add(order) # type: ignore
-            order.tab = None
-            order.save()
-
-        historic.save()
-    else:
+    if tab.client is None:
         tab.order_set.clear() # type: ignore
         tab.save()
+        return JsonResponse({"success": True}, status=200)
 
+    historic = HistoricTab.objects.create(
+        client=tab.client
+    )
+    for order in tab.order_set.all(): # type: ignore
+        historic.order_set.add(order) # type: ignore
+        order.tab = None
+        order.save()
+
+    historic.save()
+
+    tab.restaurant = None
+    tab.save()
     return JsonResponse({"success": True}, status=200)

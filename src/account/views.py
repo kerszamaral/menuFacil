@@ -7,8 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import DeleteView
 from django.contrib.auth import get_user_model
 
-from cart.models import get_cart_length
-
 from .forms import NewUserForm
 
 # Create your views here.
@@ -25,28 +23,17 @@ def signup(request: HttpRequest):
     return render(request=request,
                   template_name="account/signup.html",
                   context={
-                      "register_form":form,
-                      'cart_length': get_cart_length(request.session, request.user)
+                      "register_form":form
                     }
                 )
 
 @login_required(login_url="/account/login/")
 def index(request: HttpRequest):
-    return render(request,
-                  'account/index.html',
-                  {
-                    'cart_length': get_cart_length(request.session, request.user)
-                  }
-                )
+    return render(request, 'account/index.html')
 
 @login_required(login_url="/account/login/")
 def profile(request: HttpRequest):
-    return render(request,
-                  'account/profile.html', 
-                  {
-                    'cart_length': get_cart_length(request.session, request.user)
-                  }
-                )
+    return render(request, 'account/profile.html')
 
 @login_required(login_url="/account/login/")
 def logout_view(request):

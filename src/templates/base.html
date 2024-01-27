@@ -1,14 +1,17 @@
 <!-- templates/base.html -->
 <!DOCTYPE html>
 {% load static %}
+{% load cart_tags %}
 <html>
   <head>
     <meta charset="utf-8" />
+
     <title>
       {% block title %}
         Base Page - menuFacil
       {% endblock %}
     </title>
+
     <link rel="shortcut icon" type= "image/png" href="{% static 'menuFacil/images/favicon.ico' %}"/>
     <link rel="stylesheet" href="{% static 'menuFacil/css/style.css' %}" />
     <script src="{% static 'menuFacil/js/jquery-3.7.1.min.js' %}"></script>
@@ -30,27 +33,36 @@
     {% block head %}
     {% endblock %}
   </head>
+
   <body style = "margin:0">
+
     <main>
       {% block topbar %}
         <div class="topnav">
           <a class="active" href="{% url 'restaurant:index' %}">Home</a>
+
           {% if user.is_authenticated %}
+
             {% if user.is_staff %}
               <a href="{% url 'admin:index' %}">Admin</a>
             {% endif %}
+
             <a href="{% url 'account:profile' %}">Account: {{ user.username }}</a>
             <a href="{% url 'tab:history' %}">History</a>
+
           {% else %}
             <a href="{% url 'account:login' %}">Log In</a>
             <a href="{% url 'account:signup' %}">Sign Up</a>
           {% endif %}
+          
+          {% cart_length cart.id request.session request.user as cart_length %}
           <a href="{% url 'cart:details' %}">
             Cart {% if cart_length %}({{ cart_length }}){% endif %}
           </a>
           <a href="{% url 'tab:details' %}">Tab</a>
         </div>
-        
+
+
         <div class="messages">
           {% if messages %}
             {% for message in messages %}
@@ -60,8 +72,8 @@
         </div>
       {% endblock %}
 
-      {% block content %}
 
+      {% block content %}
       {% endblock %}
     </main>
   </body>

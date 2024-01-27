@@ -6,12 +6,20 @@ from django.conf import settings
 import qrcode
 from PIL import Image
 
+from restaurant.models import Restaurant
+
 class Tab(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True, editable=False)
     client = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        editable=False,
+        null=True,
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.SET_NULL,
         editable=False,
         null=True,
     )

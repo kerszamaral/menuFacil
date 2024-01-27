@@ -39,4 +39,3 @@ def get_cart_length(session: SessionBase, user: AbstractBaseUser | AnonymousUser
     if created:
         session[CART_KEY] = str(cart.id)
     return cart.get_length()
-
