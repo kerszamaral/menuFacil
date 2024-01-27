@@ -40,7 +40,7 @@ def add(request: HttpRequest) -> HttpResponse:
         item = cart.item_set.create( # type: ignore
             food=food,
             order=None,
-            price=food.price,
+            price=food.get_price(),
         )
     else:
         item.quantity += 1

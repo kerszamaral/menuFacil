@@ -36,7 +36,7 @@
                 {{ item.quantity }}
                 <a id="dec{{ forloop.counter }}">-</a>
               </td>
-              <td>{{ item.price }}</td>
+              <td>{{ item.get_price }}</td>
               <td>{{ item.get_total_price }}</td>
               <td>
                 <a id="remove{{ forloop.counter }}">Remove</a>

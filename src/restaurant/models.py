@@ -53,6 +53,9 @@ class Food(models.Model):
         choices=FoodType.choices,
         default=FoodType.MAIN,
     )
+    
+    def get_price(self) -> Decimal:
+        return self.price
 
     def __str__(self) -> str:
         return str(self.name)
