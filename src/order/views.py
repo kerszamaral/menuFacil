@@ -5,20 +5,24 @@ from django.views.decorators.http import require_POST
 from item.models import Item
 from cart.models import Cart
 from tab.models import Tab
-from menuFacil.validation import tab_token_exists, TAB_KEY, post_contains_keys
+from menuFacil.validation import contains, valid_uuid
 from .models import Order
 
 # Create your views here.
 @require_POST
 def create(request: HttpRequest) -> HttpResponse:
-    if not post_contains_keys(request.POST, ['cart']):
+    if not contains(request.POST, ['cart', 'tab']):
         return JsonResponse({"success": False}, status=400)
 
-    if not tab_token_exists(request.session, request.user):
+    cart = get_object_or_404(Cart, id=request.POST['cart'])
+
+    if not valid_uuid(request.POST['tab']):
         return JsonResponse({"success": False}, status=412)
 
-    cart = Cart.objects.get(id=request.POST['cart'])
-    tab = Tab.objects.get(id=request.session[TAB_KEY])
+    try:
+        tab = Tab.objects.get(id=request.POST['tab'])
+    except KeyError:
+        return JsonResponse({"success": False}, status=412)
 
     restaurant = cart.restaurant # type: ignore
 
@@ -44,7 +48,7 @@ def create(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def cancel(request: HttpRequest) -> HttpResponse:
-    if not post_contains_keys(request.POST, ['order']):
+    if not contains(request.POST, ['order']):
         return JsonResponse({"success": False}, status=400)
 
     order = get_object_or_404(Order, id=request.POST['order'])

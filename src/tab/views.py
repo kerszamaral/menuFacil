@@ -4,14 +4,19 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
 from tab.models import HistoricTab, Tab
-from menuFacil.validation import TAB_KEY, TAB_REDIRECT_URL, tab_token_exists, validate_UUID, post_contains_keys
+from menuFacil.validation import  contains, valid_uuid
+
+TAB_KEY = 'tab_token'
 
 # Create your views here.
 def details(request: HttpRequest) -> HttpResponse:
-    if not tab_token_exists(request.session, request.user):
-        return redirect(TAB_REDIRECT_URL)
+    if request.user.is_authenticated:
+        request.session['tab_token'] = str(request.user.tab.id) # type: ignore
 
-    tab = Tab.objects.get(id=request.session[TAB_KEY])
+    if 'tab_token' not in request.session.keys():
+        return redirect("tab:present")
+
+    tab = Tab.objects.get(id=request.session['tab_token'])
     orders = tab.order_set.all() # type: ignore
     orders = orders.order_by('-created_at').reverse()
     ctx = {
@@ -25,8 +30,8 @@ def present(request: HttpRequest) -> HttpResponse:
     if request.method != "POST":
         return render(request, 'tab/present.html')
 
-    if not post_contains_keys(request.POST, ['tab']) or \
-       not validate_UUID(request.POST['tab']) or \
+    if not contains(request.POST, ['tab']) or \
+       not valid_uuid(request.POST['tab']) or \
        not Tab.objects.filter(id=request.POST['tab']).exists():
         return JsonResponse({"success": False}, status=400)
 
@@ -36,15 +41,15 @@ def present(request: HttpRequest) -> HttpResponse:
 
 @login_required(login_url="/account/login/")
 def history(request: HttpRequest) -> HttpResponse:
-    ctx = {
+    return render(request, 'tab/history.html',
+        {
             'historic_tabs': HistoricTab.objects.filter(client=request.user).order_by('-created_at').reverse()
         }
-
-    return render(request, 'tab/history.html', ctx)
+    )
 
 @require_POST
 def payed(request: HttpRequest) -> HttpResponse:
-    if not post_contains_keys(request.POST, ['tab']):
+    if not contains(request.POST, ['tab']):
         return JsonResponse({"success": False}, status=400)
 
     tab = get_object_or_404(Tab, id=request.POST['tab'])

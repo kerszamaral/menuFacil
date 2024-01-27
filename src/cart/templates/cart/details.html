@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load tab_tags %}
 
 {% block title %}
   Your Cart
@@ -83,7 +84,9 @@
           SendPost(
             csrftoken,
             URL,
-            { cart: '{{ cart.id }}' },
+            { cart: '{{ cart.id }}',
+              tab: '{{ request.session|get_item:"tab_token" }}' 
+            },
             function (response) {
               window.location.href = successURL
             },

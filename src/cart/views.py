@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from restaurant.models import Food, Restaurant
 
-from menuFacil.validation import post_contains_keys
+from menuFacil.validation import contains
 
 from item.models import Item
 from .models import Cart, CART_KEY
@@ -12,7 +12,7 @@ from .models import Cart, CART_KEY
 # Create your views here.
 @require_POST
 def add(request: HttpRequest) -> HttpResponse:
-    if not post_contains_keys(request.POST, ['food', 'restaurant']):
+    if not contains(request.POST, ['food', 'restaurant']):
         return JsonResponse({"success": False}, status=400)
 
     if request.user.is_authenticated:
@@ -51,7 +51,7 @@ def add(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def increase_quantity(request: HttpRequest) -> HttpResponse:
-    if not post_contains_keys(request.POST, ['item']):
+    if not contains(request.POST, ['item']):
         return JsonResponse({"success": False}, status=400)
 
     item = get_object_or_404(Item, id=request.POST['item'])
@@ -62,7 +62,7 @@ def increase_quantity(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def decrease_quantity(request: HttpRequest) -> HttpResponse:
-    if not post_contains_keys(request.POST, ['item']):
+    if not contains(request.POST, ['item']):
         return JsonResponse({"success": False}, status=400)
 
     item = get_object_or_404(Item, id=request.POST['item'])
@@ -77,7 +77,7 @@ def decrease_quantity(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def remove(request: HttpRequest) -> HttpResponse:
-    if not post_contains_keys(request.POST, ['item']):
+    if not contains(request.POST, ['item']):
         return JsonResponse({"success": False}, status=400)
 
     item = get_object_or_404(Item, id=request.POST['item'])
