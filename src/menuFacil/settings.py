@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "menuFacil",
     "restaurant.apps.RestaurantConfig",
     "cart.apps.CartConfig",
     "order.apps.OrderConfig",

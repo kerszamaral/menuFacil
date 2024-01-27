@@ -35,21 +35,20 @@
     });
     
     Instascan.Camera.getCameras().then(function (cameras){
-      let buttons = '<label class="btn btn-primary active"><input type="radio" name="options" value="1" autocomplete="off" checked> 1 Camera</label>';
+      let buttons = '<label class="btn btn-primary active"><input type="radio" name="options" value="0" autocomplete="off" checked>' + cameras[0].name + '</label>';
       for(let i = 1; i < cameras.length; i++) {
         buttons += '\n<label class="btn btn-secondary">';
-        buttons += '<input type="radio" name="options" value="' + (i+1) +'" autocomplete="off">';
-        buttons += '' + (i+1) + ' Camera</label>';
+        buttons += '<input type="radio" name="options" value="' + i +'" autocomplete="off">';
+        buttons += cameras[i].name + '</label>';
       }
-      console.log(buttons);
       el = document.getElementById('result');
       el.innerHTML = buttons;
 
       if(cameras.length>0){
         scanner.start(cameras[0]);
         $('[name="options"]').on('change',function(){
-            if(cameras[$(this).val()-1]!=""){
-              scanner.start(cameras[$(this).val()-1]);
+            if(cameras[$(this).val()]!=""){
+              scanner.start(cameras[$(this).val()]);
             }else{
               alert('No camera found in button!');
             }
