@@ -25,4 +25,18 @@ class Tab(models.Model):
         canvas.save(stream, 'PNG')
         self.qr_code.save(file_name, File(stream), save=False) # pylint: disable=E1101
         canvas.close()
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
+
+class HistoricTab(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    client = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        editable=False,
+        null=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    order_set = models.ManyToManyField(
+        'order.Order',
+        editable=False
+    )

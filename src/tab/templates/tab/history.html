@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  History
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'tab/css/details.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
+{% endblock %}
+
+{% block content %}
+  <div class="comanda">
+    <h1>Your History</h1>
+    {% if historic_tabs %}
+        {% for tab in historic_tabs %}
+        <button class="accordion">
+        <p>Tab #{{ forloop.counter }}</p>
+        <p>Status: {{ tab.get_status_display }}</p>
+        <p>Price: {{ tab.total_price }}</p>
+        </button>
+        <div class="accordion-content">
+        <div class="container">
+            {% with orders=tab.order_set.all %}
+                {% if orders %}
+                    {% for order in orders %}
+                        <button class="accordion">
+                        <p>Order #{{ forloop.counter }}</p>
+                        <p>Status: {{ order.get_status_display }}</p>
+                        <p>Price: {{ order.total_price }}</p>
+                        </button>
+                        <div class="accordion-content">
+                        <div class="container">
+                            <div class="details">
+                            <table>
+                                <tr>
+                                <td>Order Date:</td>
+                                <td>{{ order.created_at|date:'d/m/Y H:i' }}</td>
+                                </tr>
+                                <tr>
+                                <td>Last Updated:</td>
+                                <td>{{ order.updated_at|date:'d/m/Y H:i' }}</td>
+                                </tr>
+                            </table>
+                            </div>
+
+                            <table class="table">
+                            <thead>
+                                <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.item_set.all %}
+                                <tr>
+                                    <td>{{ item.food }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.price }}</td>
+                                    <td>{{ item.get_total_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                <td colspan="2"></td>
+                                <td>Total:</td>
+                                <td>{{ order.total_price }}</td>
+                                </tr>
+                            </tfoot>
+                            </table>
+
+                            <div class="buttons">
+                            {% if order.status == 'OP' or order.status == 'MD' or order.status == 'IP' %}
+                                {% if order.pending_cancellation %}
+                                <h4>Cancelation Requested</h4>
+                                {% endif %}
+                            {% endif %}
+                            </div>
+                        </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <h3>You have no history</h3>
+    {% endif %}
+  </div>
+
+  <script>
+    var accordions = document.getElementsByClassName('accordion')
+    
+    for (var i = 0; i < accordions.length; i++) {
+      accordions[i].onclick = function () {
+        this.classList.toggle('is-open')
+    
+        var content = this.nextElementSibling
+        if (content.style.maxHeight) {
+          // accordion is currently open, so close it
+          content.style.maxHeight = null
+        } else {
+          // accordion is currently closed, so open it
+          content.style.maxHeight = content.scrollHeight + 'px'
+        }
+      }
+    }
+  </script>
+{% endblock %}

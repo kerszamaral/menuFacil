@@ -1,8 +1,10 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 from cart.models import get_cart_length
 
-from tab.models import Tab
+from tab.models import HistoricTab, Tab
 from menuFacil.validation import TAB_KEY, TAB_REDIRECT_URL, tab_token_exists, validate_UUID, post_contains_keys
 
 # Create your views here.
@@ -15,14 +17,18 @@ def details(request: HttpRequest) -> HttpResponse:
     orders = orders.order_by('-created_at').reverse()
     ctx = {
             'orders': orders,
-            'cart_length': get_cart_length(request.session, request.user)
+            'cart_length': get_cart_length(request.session, request.user),
+            'tab': tab,
         }
 
     return render(request, 'tab/details.html', ctx)
 
-def present(request: HttpRequest):
+def present(request: HttpRequest) -> HttpResponse:
     if request.method != "POST":
-        return render(request, 'tab/present.html')
+        ctx = {
+            'cart_length': get_cart_length(request.session, request.user)
+        }
+        return render(request, 'tab/present.html', ctx)
 
     if not post_contains_keys(request.POST, ['tab']) or \
        not validate_UUID(request.POST['tab']) or \
@@ -33,5 +39,33 @@ def present(request: HttpRequest):
 
     return JsonResponse({"success": True}, status=200)
 
+@login_required(login_url="/account/login/")
+def history(request: HttpRequest) -> HttpResponse:
+    ctx = {
+            'historic_tabs': HistoricTab.objects.filter(client=request.user).order_by('-created_at').reverse(),
+            'cart_length': get_cart_length(request.session, request.user)
+        }
+    
+    return render(request, 'tab/history.html', ctx)
 
-# def pay_tab():
+@require_POST
+def payed(request: HttpRequest) -> HttpResponse:
+    if not post_contains_keys(request.POST, ['tab']):
+        return JsonResponse({"success": False}, status=400)
+
+    tab = get_object_or_404(Tab, id=request.POST['tab'])
+    if tab.client is not None:
+        historic = HistoricTab.objects.create(
+            client=tab.client
+        )
+        for order in tab.order_set.all(): # type: ignore
+            historic.order_set.add(order) # type: ignore
+            order.tab = None
+            order.save()
+
+        historic.save()
+    else:
+        tab.order_set.clear() # type: ignore
+        tab.save()
+
+    return JsonResponse({"success": True}, status=200)
