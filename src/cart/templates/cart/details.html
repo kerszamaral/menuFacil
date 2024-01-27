@@ -1,52 +1,103 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Your Cart{% endblock %}
+{% block title %}
+  Your Cart
+{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'cart/css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'cart/css/style.css' %}" />
+  {% csrf_token %}
+  <script>
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+  </script>
 {% endblock %}
 
 {% block content %}
-
-<div class = "carrinho">
+  <div class="carrinho">
     {% if cart.item_set.count > 0 %}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total Price</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart.item_set.all %}
-                    <tr>
-                        <td>{{ item.food }}</td>
-                        <td>
-                            <a href="{% url 'cart:increase_quantity' item.food.id %}">+</a>
-                            {{ item.quantity }}
-                            <a href="{% url 'cart:decrease_quantity' item.food.id %}">-</a>
-                        </td>
-                        <td>{{ item.price }}</td>
-                        <td>{{ item.get_total_price  }}</td>
-                        <td><a href="{% url 'cart:remove' item.food.id %}">Remove</a></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td><a href="{% url 'order:create' %}" class="btn btn-primary">Checkout</a></td>
-                    <td colspan="2"></td>
-                    <td>Total:</td>
-                    <td>{{ cart.get_total_price }}</td>
-                </tr>
-            </tfoot>
-        </table>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart.item_set.all %}
+            <tr>
+              <td>{{ item.food }}</td>
+              <td>
+                <a id="inc{{ forloop.counter }}">+</a>
+                {{ item.quantity }}
+                <a id="dec{{ forloop.counter }}">-</a>
+              </td>
+              <td>{{ item.price }}</td>
+              <td>{{ item.get_total_price }}</td>
+              <td>
+                <a id="remove{{ forloop.counter }}">Remove</a>
+              </td>
+              <script>
+                const item_links = {"inc": "{% url 'cart:inc' %}", "dec": "{% url 'cart:dec' %}", "remove": "{% url 'cart:remove' %}"}
+                for(const [key, value] of Object.entries(item_links)) {
+                  document.getElementById(key + "{{ forloop.counter }}").onclick = function () {
+                    SendPost(
+                      csrftoken,
+                      value,
+                      { item: "{{ item.id }}" },
+                      function (data, textStatus, jqXHR) {
+                        location.reload()
+                      },
+                      function (jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown)
+                        location.reload()
+                      }
+                    )
+                  }
+                }
+              </script>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>
+              <a class="btn btn-primary" id="checkout">Checkout</a>
+            </td>
+            <td colspan="2"></td>
+            <td>Total:</td>
+            <td>{{ cart.get_total_price }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <script>
+        const URL = "{% url 'order:create' %}"
+        const successURL = "{% url 'tab:details' %}"
+        const errorURL = "{% url 'tab:present' %}"
+        
+        document.getElementById('checkout').onclick = function () {
+          SendPost(
+            csrftoken,
+            URL,
+            { cart: '{{ cart.id }}' },
+            function (response) {
+              window.location.href = successURL
+            },
+            function (error) {
+              if (error.status == 412) {
+                window.location.href = errorURL
+              }
+              console.log(error)
+            }
+          )
+        }
+      </script>
     {% else %}
-        <p>Your shopping cart is empty.</p>
+      <p>Your shopping cart is empty.</p>
     {% endif %}
-</div>
+  </div>
 {% endblock %}

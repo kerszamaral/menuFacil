@@ -6,7 +6,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from django.conf import settings
 from restaurant.models import Restaurant
 
-from menuFacil.validation import CART_KEY, cart_token_exists
+CART_KEY = 'cart_token'
 
 # Create your models here.
 class Cart(models.Model):
@@ -30,15 +30,13 @@ class Cart(models.Model):
 
 
 def get_cart_length(session: SessionBase, user: AbstractBaseUser | AnonymousUser) -> int:
-    if not cart_token_exists(session, user):
-        return 0
+    if user.is_authenticated:
+        session[CART_KEY] = str(user.cart.id) # type: ignore
 
-    cart = Cart.objects.get(id=session[CART_KEY])
+    (cart, created)= Cart.objects.get_or_create(id=session.get(CART_KEY, None),
+                        defaults={'client': user if user.is_authenticated else None}
+                    )
+    if created:
+        session[CART_KEY] = str(cart.id)
     return cart.get_length()
 
-def get_cart_total_price(session: SessionBase, user: AbstractBaseUser | AnonymousUser) -> float:
-    if not cart_token_exists(session, user):
-        return 0
-
-    cart = Cart.objects.get(id=session[CART_KEY])
-    return cart.get_total_price()

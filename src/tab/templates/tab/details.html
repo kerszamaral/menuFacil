@@ -18,6 +18,12 @@
         <a href="">Pay Tab</a>
       </div>
       <p></p>
+      {% csrf_token %}
+      <script>
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+        const cancelURL = "{% url 'order:cancel' %}"
+      </script>
+
       {% for order in orders %}
         <button class="accordion">
           <p>Order #{{ forloop.counter }}</p>
@@ -71,11 +77,26 @@
               {% if order.status == 'OP' or order.status == 'MD' or order.status == 'IP' %}
                 {% if not order.pending_cancellation and not order.payed %}
                   <div class="button-danger">
-                    <a href="{% url 'order:cancel' order.id %}" c>Cancel Order</a>
+                    <a id="cancel{{ forloop.counter }}">Cancel Order</a>
+                    <script>
+                      document.getElementById('cancel{{ forloop.counter }}').onclick = function () {
+                        SendPost(
+                          csrftoken,
+                          cancelURL,
+                          { order: '{{ order.id }}' },
+                          function (data, textStatus, jqXHR) {
+                            location.reload()
+                          },
+                          function (jqXHR, textStatus, errorThrown) {
+                            console.log(errorThrown)
+                          }
+                        )
+                      }
+                    </script>
                   </div>
                 {% endif %}
                 {% if order.pending_cancellation %}
-                    <h4>Cancelation Requested</h4>
+                  <h4>Cancelation Requested</h4>
                 {% endif %}
               {% endif %}
             </div>

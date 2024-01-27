@@ -1,21 +1,23 @@
-from uuid import UUID
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 
 from item.models import Item
 from cart.models import Cart
 from tab.models import Tab
-from menuFacil.validation import cart_token_exists, tab_token_exists, CART_KEY, TAB_KEY, CART_REDIRECT_URL, TAB_REDIRECT_URL
+from menuFacil.validation import tab_token_exists, TAB_KEY, post_contains_keys
 from .models import Order
 
 # Create your views here.
+@require_POST
 def create(request: HttpRequest) -> HttpResponse:
-    if not cart_token_exists(request.session, request.user):
-        return redirect(CART_REDIRECT_URL)
-    if not tab_token_exists(request.session, request.user):
-        return redirect(TAB_REDIRECT_URL)
+    if not post_contains_keys(request.POST, ['cart']):
+        return JsonResponse({"success": False}, status=400)
 
-    cart = Cart.objects.get(id=request.session[CART_KEY])
+    if not tab_token_exists(request.session, request.user):
+        return JsonResponse({"success": False}, status=412)
+
+    cart = Cart.objects.get(id=request.POST['cart'])
     tab = Tab.objects.get(id=request.session[TAB_KEY])
 
     restaurant = cart.restaurant # type: ignore
@@ -38,13 +40,14 @@ def create(request: HttpRequest) -> HttpResponse:
 
     cart.restaurant = None
     cart.save()
-    return redirect('tab:details')
+    return JsonResponse({"success": True}, status=200)
 
-def cancel(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    if not cart_token_exists(request.session, request.user):
-        return redirect(CART_REDIRECT_URL)
+@require_POST
+def cancel(request: HttpRequest) -> HttpResponse:
+    if not post_contains_keys(request.POST, ['order']):
+        return JsonResponse({"success": False}, status=400)
 
-    order = get_object_or_404(Order, id=order_id)
+    order = get_object_or_404(Order, id=request.POST['order'])
     order.pending_cancellation = True
     order.save()
-    return redirect('tab:details')
+    return JsonResponse({"success": True}, status=200)

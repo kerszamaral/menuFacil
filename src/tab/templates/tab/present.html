@@ -5,10 +5,7 @@
 
 {% block head %}
     <link rel="stylesheet" href="{% static 'restaurant/css/index.css' %}" />
-    {% comment %}! Doesn't work for some reason? {% endcomment %}
-    {% comment %} <script type="text/javascript" src="{% static 'tab/instascan.min.js' %}"></script> {% endcomment %}
-    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="{% static 'tab/js/instascan.min.js' %}"></script>
 {% endblock %}
 
 
@@ -20,33 +17,21 @@
   {% csrf_token %}
   <script type="text/javascript">
     var scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5, mirror: false });
-    var URL = "{% url 'tab:present' %}";
-
-    var redirectURL = "{% url 'home' %}";
-
+    
+    const URL = "{% url 'tab:present' %}";
+    const redirectURL = "{% url 'home' %}";
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    function SendQRCode(content){
-        var QRCode = {'data': content};
-        $.ajax({
-          url : URL,
-          type: "POST",
-          headers: {'X-CSRFToken': '{{ csrf_token }}'},
-          data : QRCode,
-          dataType : "json",
-          success: function(data, textStatus, jqXHR)
-          {
+
+    scanner.addListener('scan', function(content){
+      SendPost(csrftoken, URL, {'tab': content},
+        function(data, textStatus, jqXHR) {
             alert('Successfully presented tab!');
             window.location.href=redirectURL;
-          },
-          error: function (jqXHR, textStatus, errorThrown)
-          {
+        },
+        function (jqXHR, textStatus, errorThrown) {
             alert('Invalid QRCode!');
-          }
-      })
-    }
-
-    scanner.addListener('scan',function(content){ 
-      SendQRCode(content);
+        }
+      )
     });
     
     Instascan.Camera.getCameras().then(function (cameras){

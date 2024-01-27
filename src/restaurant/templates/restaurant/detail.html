@@ -14,19 +14,40 @@
     <h1 class="texto">{{ restaurant.name }}</h1>
     <h2 class="texto">{{ restaurant.message }}</h2>
     <div class="menus">
+      {% csrf_token %}
+      <script>
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+        const addURL = "{% url 'cart:add' %}"
+      </script>
       {% for menu in restaurant.menu_set.all %}
         <section class="menu-item">
           <h3>{{ menu.name }}</h3>
           {% for food in menu.food_set.all %}
             <div class="container">
               {% if not food.hidden %}
-                <a href="{% url 'cart:add' restaurant.id food.id %}">
+                <a id="food{{ forloop.counter }}">
                   {% if food.photo %}
                     <img src="{{ food.photo.url }}" alt="{{ food.name }}" />
                   {% endif %}
                   <p>{{ food.name }} - R$ {{ food.price }}</p>
                   <p><small>{{ food.description }}</small></p>
                 </a>
+                <script>
+                  document.getElementById("food{{ forloop.counter }}").onclick = function () {
+                    SendPost(
+                      csrftoken,
+                      addURL,
+                      { food: "{{ food.id }}", restaurant: "{{ restaurant.id }}"},
+                      function (data, textStatus, jqXHR) {
+                        location.reload()
+                      },
+                      function (jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown)
+                        location.reload()
+                      }
+                    )
+                  }
+                </script>
               {% endif %}
             </div>
           {% endfor %}

@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 from cart.models import get_cart_length
 
 from tab.models import Tab
-from menuFacil.validation import TAB_KEY, TAB_REDIRECT_URL, tab_token_exists, validate_UUID
+from menuFacil.validation import TAB_KEY, TAB_REDIRECT_URL, tab_token_exists, validate_UUID, post_contains_keys
 
 # Create your views here.
 def details(request: HttpRequest) -> HttpResponse:
@@ -21,27 +21,17 @@ def details(request: HttpRequest) -> HttpResponse:
     return render(request, 'tab/details.html', ctx)
 
 def present(request: HttpRequest):
-    if request.method == "POST":
-        if not validate_UUID(request.POST['data']):
-            response = JsonResponse({"success": False})
-            response.status_code = 400
-            return response
+    if request.method != "POST":
+        return render(request, 'tab/present.html')
 
-        tab_id = request.POST['data']
+    if not post_contains_keys(request.POST, ['tab']) or \
+       not validate_UUID(request.POST['tab']) or \
+       not Tab.objects.filter(id=request.POST['tab']).exists():
+        return JsonResponse({"success": False}, status=400)
 
-        try:
-            tab = Tab.objects.get(id=tab_id)
-        except Tab.DoesNotExist:
-            response = JsonResponse({"success": False})
-            response.status_code = 404
-            return response
+    request.session[TAB_KEY] = request.POST['tab']
 
-        request.session[TAB_KEY] = str(tab.id) # type: ignore
+    return JsonResponse({"success": True}, status=200)
 
-        response = JsonResponse({"success": True})
-        response.status_code = 200 # To announce that the user isn't allowed to publish
-        return response
-
-    return render(request, 'tab/present.html')
 
 # def pay_tab():
