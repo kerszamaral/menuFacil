@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load qr_code %}
 
 {% block title %}
   Your Tab
@@ -13,6 +14,7 @@
 {% block content %}
   <div class="comanda">
     <h1>Your Tab</h1>
+    {% qr_from_text tab.id size="M" %}
     {% if orders %}
       {% csrf_token %}
       <script>
@@ -42,7 +44,7 @@
         <button class="accordion">
           <p>Order #{{ forloop.counter }}</p>
           <p>Status: {{ order.get_status_display }}</p>
-          <p>Price: {{ order.total_price }}</p>
+          <p>Price: {{ order.get_total_price }}</p>
         </button>
         <div class="accordion-content">
           <div class="container">
@@ -82,7 +84,7 @@
                 <tr>
                   <td colspan="2"></td>
                   <td>Total:</td>
-                  <td>{{ order.total_price }}</td>
+                  <td>{{ order.get_total_price }}</td>
                 </tr>
               </tfoot>
             </table>

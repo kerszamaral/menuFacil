@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'django_object_actions',
     'django_extensions',
+    'qr_code',
 ]
 
 MIDDLEWARE = [

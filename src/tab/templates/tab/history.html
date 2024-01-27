@@ -17,18 +17,18 @@
         {% for tab in historic_tabs %}
         <button class="accordion">
         <p>Tab #{{ forloop.counter }}</p>
-        <p>Status: {{ tab.get_status_display }}</p>
-        <p>Price: {{ tab.total_price }}</p>
+        <p>Restaurant: {{ tab.restaurant.name }}</p>
+        <p>Price: {{ tab.get_total_price }}</p>
         </button>
         <div class="accordion-content">
         <div class="container">
-            {% with orders=tab.order_set.all %}
+            {% with orders=tab.order.all %}
                 {% if orders %}
                     {% for order in orders %}
                         <button class="accordion">
                         <p>Order #{{ forloop.counter }}</p>
                         <p>Status: {{ order.get_status_display }}</p>
-                        <p>Price: {{ order.total_price }}</p>
+                        <p>Price: {{ order.get_total_price }}</p>
                         </button>
                         <div class="accordion-content">
                         <div class="container">
@@ -68,7 +68,7 @@
                                 <tr>
                                 <td colspan="2"></td>
                                 <td>Total:</td>
-                                <td>{{ order.total_price }}</td>
+                                <td>{{ order.get_total_price }}</td>
                                 </tr>
                             </tfoot>
                             </table>

@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
+from django.contrib import messages
 
 from item.models import Item
 from cart.models import Cart
@@ -15,22 +16,27 @@ def create(request: HttpRequest) -> HttpResponse:
         return JsonResponse({"success": False}, status=400)
 
     cart = get_object_or_404(Cart, id=request.POST['cart'])
+    if cart.restaurant is None:
+        return JsonResponse({"success": False}, status=404)
 
     if not valid_uuid(request.POST['tab']):
         return JsonResponse({"success": False}, status=412)
-
     try:
         tab = Tab.objects.get(id=request.POST['tab'])
     except KeyError:
         return JsonResponse({"success": False}, status=412)
-
-    restaurant = cart.restaurant # type: ignore
+    
+    if tab.restaurant is None:
+        tab.restaurant = cart.restaurant
+        tab.save()
+    elif tab.restaurant.id != cart.restaurant.id:
+        messages.error(request, 'Cannot order from multiple restaurant to tab')
+        return JsonResponse({"success": False}, status=406)
 
     # Create the order
     order = Order.objects.create(
         tab=tab,
-        restaurant=restaurant,
-        total_price=cart.get_total_price(),
+        restaurant=cart.restaurant,
         status = Order.StatusType.MADE,
     )
     order.save()

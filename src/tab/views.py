@@ -2,6 +2,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from order.models import Order
 
 from tab.models import HistoricTab, Tab
 from menuFacil.validation import  contains, valid_uuid
@@ -17,7 +18,7 @@ def details(request: HttpRequest) -> HttpResponse:
         return redirect("tab:present")
 
     tab = Tab.objects.get(id=request.session['tab_token'])
-    orders = tab.order_set.all() # type: ignore
+    orders = tab.order.all()
     orders = orders.order_by('-created_at').reverse()
     ctx = {
             'orders': orders,
@@ -54,19 +55,20 @@ def payed(request: HttpRequest) -> HttpResponse:
 
     tab = get_object_or_404(Tab, id=request.POST['tab'])
     if tab.client is None:
-        tab.order_set.clear() # type: ignore
+        tab.order.clear()
         tab.save()
         return JsonResponse({"success": True}, status=200)
 
     historic = HistoricTab.objects.create(
-        client=tab.client
+        client=tab.client,
+        restaurant=tab.restaurant,
     )
-    for order in tab.order_set.all(): # type: ignore
-        historic.order_set.add(order) # type: ignore
-        order.tab = None
-        order.save()
-
     historic.save()
+
+    order: Order
+    for order in tab.order.all():
+        order.tab = historic
+        order.save()
 
     tab.restaurant = None
     tab.save()
