@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load qr_code %}
 
 {% block title %}
   Your Tab
@@ -14,31 +13,20 @@
 {% block content %}
   <div class="comanda">
     <h1>Your Tab</h1>
-    {% qr_from_text tab.id size="M" %}
     {% if orders %}
       {% csrf_token %}
       <script>
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
         const cancelURL = "{% url 'order:cancel' %}"
       </script>
-      <div class="button">
-        <a id="pay">Pay Tab</a>
+      <div class="pay-buttons">
+        <div class="button">
+          <a href="{% url 'tab:online' %}">Pay Online</a>
+        </div>
+        <div class="button">
+          <a href="{% url 'tab:physical' %}">Pay at the Bar</a>
+        </div>
       </div>
-      <script>
-        document.getElementById('pay').onclick = function () {
-          SendPost(
-            csrftoken,
-            "{% url 'tab:payed' %}",
-            {tab: '{{ tab.id }}'},
-            function (data, textStatus, jqXHR) {
-              location.reload()
-            },
-            function (jqXHR, textStatus, errorThrown) {
-              console.log(errorThrown)
-            }
-          )
-        }
-      </script>
       <p></p>
       {% for order in orders %}
         <button class="accordion">

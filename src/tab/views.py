@@ -1,7 +1,8 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from order.models import Order
 
 from tab.models import HistoricTab, Tab
@@ -12,12 +13,12 @@ TAB_KEY = 'tab_token'
 # Create your views here.
 def details(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
-        request.session['tab_token'] = str(request.user.tab.id) # type: ignore
+        request.session[TAB_KEY] = str(request.user.tab.id) # type: ignore
 
-    if 'tab_token' not in request.session.keys():
+    if TAB_KEY not in request.session.keys():
         return redirect("tab:present")
 
-    tab = Tab.objects.get(id=request.session['tab_token'])
+    tab = Tab.objects.get(id=request.session[TAB_KEY])
     orders = tab.order.all()
     orders = orders.order_by('-created_at').reverse()
     ctx = {
@@ -40,6 +41,15 @@ def present(request: HttpRequest) -> HttpResponse:
 
     return JsonResponse({"success": True}, status=200)
 
+def pay_physical(request: HttpRequest) -> HttpResponse:
+    if TAB_KEY not in request.session.keys():
+        messages.error(request, "Error in getting your Tab")
+        return redirect("tab:details")
+    return render(request, 'tab/physical.html', {"tab_id": request.session[TAB_KEY]})
+
+def pay_online(request: HttpRequest) -> HttpResponse:
+    return redirect("home")
+
 @login_required(login_url="/account/login/")
 def history(request: HttpRequest) -> HttpResponse:
     return render(request, 'tab/history.html',
@@ -48,8 +58,11 @@ def history(request: HttpRequest) -> HttpResponse:
         }
     )
 
-@require_POST
+@require_http_methods(["GET", "POST"])
 def payed(request: HttpRequest) -> HttpResponse:
+    if request.method == "GET":
+        return redirect("tab:details")
+
     if not contains(request.POST, ['tab']):
         return JsonResponse({"success": False}, status=400)
 

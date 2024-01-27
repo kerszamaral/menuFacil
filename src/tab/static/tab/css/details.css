@@ -6,6 +6,13 @@
     align-items: center;
 }
 
+.pay-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 40px;
+}
 button.accordion {
     width: 50%;
     background-color: whitesmoke;
