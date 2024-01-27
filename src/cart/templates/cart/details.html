@@ -36,8 +36,8 @@
                 {{ item.quantity }}
                 <a id="dec{{ forloop.counter }}">-</a>
               </td>
-              <td>{{ item.get_price }}</td>
-              <td>{{ item.get_total_price }}</td>
+              <td>{{ item.get_price|floatformat:2 }}</td>
+              <td>{{ item.get_total_price|floatformat:2 }}</td>
               <td>
                 <a id="remove{{ forloop.counter }}">Remove</a>
               </td>
@@ -70,7 +70,7 @@
             </td>
             <td colspan="2"></td>
             <td>Total:</td>
-            <td>{{ cart.get_total_price }}</td>
+            <td>{{ cart.get_total_price|floatformat:2 }}</td>
           </tr>
         </tfoot>
       </table>

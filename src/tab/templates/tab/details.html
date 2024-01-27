@@ -32,7 +32,7 @@
         <button class="accordion">
           <p>Order #{{ forloop.counter }}</p>
           <p>Status: {{ order.get_status_display }}</p>
-          <p>Price: {{ order.get_total_price }}</p>
+          <p>Price: {{ order.get_total_price|floatformat:2 }}</p>
         </button>
         <div class="accordion-content">
           <div class="container">
@@ -63,8 +63,8 @@
                   <tr>
                     <td>{{ item.food }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>{{ item.price }}</td>
-                    <td>{{ item.get_total_price }}</td>
+                    <td>{{ item.get_price|floatformat:2 }}</td>
+                    <td>{{ item.get_total_price|floatformat:2 }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -72,7 +72,7 @@
                 <tr>
                   <td colspan="2"></td>
                   <td>Total:</td>
-                  <td>{{ order.get_total_price }}</td>
+                  <td>{{ order.get_total_price|floatformat:2 }}</td>
                 </tr>
               </tfoot>
             </table>

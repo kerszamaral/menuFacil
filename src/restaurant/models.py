@@ -16,15 +16,26 @@ class Restaurant(models.Model):
     def __str__(self) -> str:
         return str(self.name)
 
-PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
 
 class Menu(models.Model):
     """Model representing a Menu of a Restaurant."""
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, editable=False)
     name = models.CharField(max_length=200)
+
+    def __str__(self) -> str:
+        return str(self.name)
+
+PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
+
+class Promotion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, editable=False)
+    menu = models.ManyToManyField(Menu)
+    name = models.CharField(max_length=200)
     discount = models.DecimalField(max_digits=3, decimal_places=0, default=Decimal(0),
                                    validators=PERCENTAGE_VALIDATOR)
+    active = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return str(self.name)
@@ -53,9 +64,10 @@ class Food(models.Model):
         choices=FoodType.choices,
         default=FoodType.MAIN,
     )
-    
+
     def get_price(self) -> Decimal:
-        return self.price
+        return self.price if not self.menu.promotion_set.filter(active=True).exists() else \
+            self.price * (1 - self.menu.promotion_set.filter(active=True).first().discount / 100) # type: ignore
 
     def __str__(self) -> str:
         return str(self.name)

@@ -29,7 +29,7 @@
                   {% if food.photo %}
                     <img src="{{ food.photo.url }}" alt="{{ food.name }}" />
                   {% endif %}
-                  <p>{{ food.name }} - R$ {{ food.get_price }}</p>
+                  <p>{{ food.name }} - R$ {{ food.get_price|floatformat:2 }}</p>
                   <p><small>{{ food.description }}</small></p>
                 </a>
                 <script>

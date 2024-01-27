@@ -97,6 +97,7 @@ def payed(request: HttpRequest, tab_id: str | None = None) -> HttpResponse:
     if tab.client is None:
         tab.order.clear()
         tab.save()
+        request.session[TAB_KEY] = None
         return JsonResponse({"success": True}, status=200)
 
     historic = HistoricTab.objects.create(

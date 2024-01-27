@@ -9,7 +9,7 @@ from django_object_actions import DjangoObjectActions
 
 from order.models import Order
 from item.models import Item
-from .models import Restaurant, Menu, Food
+from .models import Promotion, Restaurant, Menu, Food
 
 class LockedModel(object):
     def has_add_permission(self, request, obj=None) -> bool:
@@ -76,6 +76,12 @@ class FoodInline(admin.TabularInline):
     model = Food
     list_display = ('name', 'price')
     extra = 1
+    
+@admin.register(Promotion)
+class PromotionAdmin(HiddenModel, admin.ModelAdmin):
+    list_display = ('name', 'discount', 'active')
+    list_filter = ['active']
+    search_fields = ['name']
 
 @admin.register(Menu)
 class MenuAdmin(HiddenModel, admin.ModelAdmin):
@@ -105,16 +111,7 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin
         else:
             self.message_user(request, "Order not pending cancellation")
 
-    def approve_payment(self, request, obj):
-        # if not obj.payed and not obj.status == Order.StatusType.OPEN and not obj.status == Order.StatusType.CANCELLED and not obj.pending_cancellation:
-        #     obj.payed = True
-        #     obj.save()
-        #     self.message_user(request, "Order payed")
-        # else:
-        #     self.message_user(request, "Unable to pay order")
-        pass
-
-    change_actions = ('approve_cancellation', 'approve_payment')
+    change_actions = ('approve_cancellation',)
 
 class OrdersInline(LockedModel, admin.TabularInline):
     model = Order
@@ -147,6 +144,11 @@ class MakingOrdersInline(OrdersInline):
               ).exclude(status=Order.StatusType.CANCELLED
               ).exclude(status=Order.StatusType.DELIVERED)
         return qs.order_by('-updated_at')
+    
+class PromotionInline(admin.TabularInline, EditLinkToInlineObject):
+    model = Promotion
+    extra = 0
+    readonly_fields = ('edit_link',)
 
 class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     model = Menu
@@ -158,4 +160,4 @@ class RestaurantAdmin(PermissionCheckModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
-    inlines = [MenuInline, MakingOrdersInline, OrdersInline]
+    inlines = [MenuInline, PromotionInline, MakingOrdersInline, OrdersInline]
