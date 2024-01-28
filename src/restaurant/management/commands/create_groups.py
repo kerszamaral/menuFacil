@@ -4,23 +4,33 @@ from django.contrib.auth.models import Group, Permission
 
 from restaurant import models as restaurant_models
 from order import models as order_models
+from item import models as item_models
+from tab import models as tab_models
 
 GROUPS_PERMISSIONS = {
     'owner': {
         "userobjectpermission": ['add', 'change', 'delete', 'view'],
+        restaurant_models.Promotion: ['add', 'change', 'delete', 'view'],
         restaurant_models.Menu: ['add', 'change', 'delete', 'view'],
         restaurant_models.Food: ['add', 'change', 'delete', 'view'],
-        order_models.Order: ['change', 'view'],
+        order_models.Order: ['change', 'view', 'delete'],
+        tab_models.Tab: ['add'],
+        item_models.Item: ['view'],
     },
     'manager': {
+        restaurant_models.Promotion: ['add', 'change', 'delete', 'view'],
         restaurant_models.Menu: ['add', 'change', 'delete', 'view'],
         restaurant_models.Food: ['add', 'change', 'delete', 'view'],
-        order_models.Order: ['change', 'view'],
+        order_models.Order: ['change', 'view', 'delete'],
+        tab_models.Tab: ['add'],
+        item_models.Item: ['view'],
     },
     'employee': {
+        restaurant_models.Promotion: ['view'],
         restaurant_models.Menu: ['view'],
         restaurant_models.Food: ['view'],
         order_models.Order: ['change', 'view'],
+        item_models.Item: ['view'],
     },
 }
 
