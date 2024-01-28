@@ -33,7 +33,7 @@ def create_pdf(html, name: str) -> FileResponse:
     return FileResponse('Error Rendering PDF', status=400)
 
 def get_qrcode(request: HttpRequest, tab_id: UUID) -> FileResponse:
-    html = get_template('restaurant/qrcode.html').render({'tab_id': tab_id})
+    html = get_template('restaurant/qrcode.html').render({'tab_id': str(tab_id)})
     return create_pdf(html, f"{str(tab_id).split('-')[0]}-qrcode")
 
 def sales(request: HttpRequest, restaurant_id: UUID):

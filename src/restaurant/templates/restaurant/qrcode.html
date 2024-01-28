@@ -9,7 +9,7 @@
     <main>
       <div>
         {% if tab_id %}
-          {% qr_from_text tab_id size = 'M' image_format = 'png' %}
+          {% qr_from_text tab_id size="m" image_format="png" error_correction="L" %}
         {% else %}
           <h1>Error Displaying QRCode</h1>
         {% endif %}
