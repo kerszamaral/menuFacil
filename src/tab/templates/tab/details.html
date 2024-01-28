@@ -78,8 +78,8 @@
             </table>
 
             <div class="buttons">
-              {% if order.status == 'OP' or order.status == 'MD' or order.status == 'IP' %}
-                {% if not order.pending_cancellation and not order.payed %}
+              {% if order.status == 'MD' or order.status == 'IP' %}
+                {% if not order.pending_cancellation %}
                   <div class="button-danger">
                     <a id="cancel{{ forloop.counter }}">Cancel Order</a>
                     <script>
@@ -98,8 +98,7 @@
                       }
                     </script>
                   </div>
-                {% endif %}
-                {% if order.pending_cancellation %}
+                {% else %}
                   <h4>Cancelation Requested</h4>
                 {% endif %}
               {% endif %}
@@ -109,6 +108,9 @@
       {% endfor %}
     {% else %}
       <p>Your Tab is empty.</p>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'tab:payed' %}">Remove Tab</a>
+      {% endif %}
     {% endif %}
   </div>
 

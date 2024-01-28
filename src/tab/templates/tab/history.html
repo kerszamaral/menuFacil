@@ -74,7 +74,7 @@
                             </table>
 
                             <div class="buttons">
-                            {% if order.status == 'OP' or order.status == 'MD' or order.status == 'IP' %}
+                            {% if order.status == 'MD' or order.status == 'IP' %}
                                 {% if order.pending_cancellation %}
                                 <h4>Cancelation Requested</h4>
                                 {% endif %}

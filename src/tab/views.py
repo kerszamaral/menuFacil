@@ -20,7 +20,13 @@ def details(request: HttpRequest) -> HttpResponse:
     if TAB_KEY not in request.session.keys():
         return redirect("tab:present")
 
-    tab = Tab.objects.get(id=request.session[TAB_KEY])
+    try:
+        tab = Tab.objects.get(id=request.session[TAB_KEY])
+    except Tab.DoesNotExist:
+        messages.error(request, "Error in getting your Tab")
+        request.session.pop(TAB_KEY)
+        return redirect("tab:present")
+
     orders = tab.order.all()
     orders = orders.order_by('-created_at').reverse()
     ctx = {
@@ -59,8 +65,7 @@ def pay_online(request: HttpRequest) -> HttpResponse:
             if TAB_KEY in request.session.keys():
                 r = payed(request, tab_id=request.session[TAB_KEY])
                 if r.status_code == 200:
-                    messages.success(request, "Tab paid successfully")
-                    return redirect("tab:details")
+                    return redirect("tab:payed")
         else:
             for error in form.errors:
                 print(error)
@@ -88,6 +93,8 @@ def payed(request: HttpRequest, tab_id: str | None = None) -> HttpResponse:
             return redirect("tab:details")
         if Tab.objects.get(id=request.session[TAB_KEY]).order.count() == 0:
             messages.success(request, "Tab paid successfully")
+            if not request.user.is_authenticated:
+                request.session.pop(TAB_KEY)
             return redirect('home')
         messages.error(request, "Tab hasn't been paid yet")
         return redirect("tab:details")
@@ -96,23 +103,21 @@ def payed(request: HttpRequest, tab_id: str | None = None) -> HttpResponse:
         return JsonResponse({"success": False}, status=400)
 
     tab = get_object_or_404(Tab, id=tab_id or request.POST['tab'])
-    if tab.client is None:
-        tab.order.clear()
-        tab.save()
-        request.session[TAB_KEY] = None
-        return JsonResponse({"success": True}, status=200)
 
-    historic = HistoricTab.objects.create(
-        client=tab.client,
-        restaurant=tab.restaurant,
-    )
-    historic.save()
+    new_tab: HistoricTab | None
+    if tab.client is None:
+        new_tab = None
+    else:
+        new_tab = HistoricTab.objects.create(
+            client=tab.client,
+            restaurant=tab.restaurant,
+        )
+        tab.restaurant = None
 
     order: Order
     for order in tab.order.all():
-        order.tab = historic
+        order.tab = new_tab
         order.save()
 
-    tab.restaurant = None
     tab.save()
     return JsonResponse({"success": True}, status=200)
