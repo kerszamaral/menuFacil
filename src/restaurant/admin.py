@@ -1,14 +1,17 @@
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
+from django.shortcuts import redirect, resolve_url
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
 from django_object_actions import DjangoObjectActions
 
+
 from order.models import Order
 from item.models import Item
+from tab.models import Tab
 from .models import Promotion, Restaurant, Menu, Food
 
 class LockedModel(object):
@@ -144,7 +147,7 @@ class MakingOrdersInline(OrdersInline):
               ).exclude(status=Order.StatusType.CANCELLED
               ).exclude(status=Order.StatusType.DELIVERED)
         return qs.order_by('-updated_at')
-    
+
 class PromotionInline(admin.TabularInline, EditLinkToInlineObject):
     model = Promotion
     extra = 0
@@ -155,9 +158,31 @@ class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     extra = 0
     readonly_fields = ('edit_link',)
 
+class TabInline(admin.TabularInline):
+    model = Tab
+    extra = 0
+    max_num = 0
+    readonly_fields = ('get_qrcode', )
+
+    def get_qrcode(self, instance):
+        if instance.pk:
+            url = resolve_url('restaurant:qrcode', tab_id=str(instance.pk))
+            return mark_safe(f'<a href="{url}">Get QRCode</a>')
+        return ''
+
+
 @admin.register(Restaurant)
-class RestaurantAdmin(PermissionCheckModelAdmin):
+class RestaurantAdmin(DjangoObjectActions, GuardedModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
-    inlines = [MenuInline, PromotionInline, MakingOrdersInline, OrdersInline]
+    change_actions = ['object_permissions', 'create_tab' ]
+    inlines = [MenuInline, PromotionInline, MakingOrdersInline, OrdersInline, TabInline]
+
+    def create_tab(self, request: HttpRequest, obj):
+        Tab.objects.create(restaurant=obj)
+
+    # Needed because of bug in django-object-actions
+    def object_permissions(self, request: HttpRequest, obj):
+        return redirect(reverse(f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
+                      args=[obj.pk] ))

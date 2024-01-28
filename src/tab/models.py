@@ -33,7 +33,8 @@ class AbstractTab(models.Model):
         return sum(order.get_total_price() for order in self.order.all())
 
 class Tab(AbstractTab):
-    pass
+    def __str__(self) -> str:
+        return str(self.id).split('-')[0]
 
 class HistoricTab(AbstractTab):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
