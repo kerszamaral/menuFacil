@@ -79,7 +79,7 @@ class FoodInline(admin.TabularInline):
     model = Food
     list_display = ('name', 'price')
     extra = 1
-    
+
 @admin.register(Promotion)
 class PromotionAdmin(HiddenModel, admin.ModelAdmin):
     list_display = ('name', 'discount', 'active')
@@ -102,7 +102,7 @@ class ItemInline(LockedModel, admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
     inlines = [ItemInline]
-    readonly_fields = ('pending_cancellation', 
+    readonly_fields = ('pending_cancellation',
                        'created_at',
                        'updated_at')
 

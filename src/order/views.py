@@ -25,7 +25,7 @@ def create(request: HttpRequest) -> HttpResponse:
         tab = Tab.objects.get(id=request.POST['tab'])
     except KeyError:
         return JsonResponse({"success": False}, status=412)
-    
+
     if tab.restaurant is None:
         tab.restaurant = cart.restaurant
         tab.save()

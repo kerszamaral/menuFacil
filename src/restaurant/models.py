@@ -16,6 +16,18 @@ class Restaurant(models.Model):
     def __str__(self) -> str:
         return str(self.name)
 
+    def get_most_popular_foods(self):
+        foods = Food.objects.filter(menu__restaurant=self)
+        popular_foods = foods.order_by('-item__quantity').distinct()[:5]
+        return popular_foods
+
+    def get_total_sales(self) -> int:
+        foods = Food.objects.filter(menu__restaurant=self)
+        return sum(food.get_total_sales() for food in foods)
+
+    def get_total_sales_amount(self) -> Decimal:
+        foods = Food.objects.filter(menu__restaurant=self)
+        return sum((food.get_total_sales_amount() for food in foods), Decimal(0))
 
 PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
 
@@ -71,6 +83,12 @@ class Food(models.Model):
     def get_price(self) -> Decimal:
         best_promotion = self.menu.get_best_promotion()  if self.menu else None
         return self.price if not best_promotion else self.price * (1 - best_promotion.discount / 100)
+    
+    def get_total_sales(self) -> int:
+        return self.item_set.aggregate(models.Sum('quantity'))['quantity__sum'] or 0 # type: ignore
+    
+    def get_total_sales_amount(self) -> Decimal:
+        return self.item_set.aggregate(models.Sum('price'))['price__sum'] or Decimal(0) # type: ignore
 
     def __str__(self) -> str:
         return str(self.name)

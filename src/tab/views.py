@@ -32,6 +32,8 @@ def details(request: HttpRequest) -> HttpResponse:
 
 def present(request: HttpRequest) -> HttpResponse:
     if request.method != "POST":
+        if TAB_KEY in request.session.keys():
+            return redirect("tab:details")
         return render(request, 'tab/present.html')
 
     if not contains(request.POST, ['tab']) or \
