@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Pay Online
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'tab/css/details.css' %}" />
+{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+  <div class="form">
+    <form method="POST">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-primary">Pay</button>
+    </form>
+  </div>
+{% endblock %}

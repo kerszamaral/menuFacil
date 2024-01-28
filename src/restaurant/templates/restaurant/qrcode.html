@@ -1,0 +1,19 @@
+{% load static %}
+{% load qr_code %}
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body style="margin:0">
+    <main>
+      <div>
+        {% if tab_id %}
+          {% qr_from_text tab_id size="m" image_format="png" error_correction="L" %}
+        {% else %}
+          <h1>Error Displaying QRCode</h1>
+        {% endif %}
+      </div>
+    </main>
+  </body>
+</html>

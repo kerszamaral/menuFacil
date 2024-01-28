@@ -1,91 +1,67 @@
-from uuid import UUID
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
-from django.contrib.messages import get_messages
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
+from django.contrib import messages
 
+from item.models import Item
 from cart.models import Cart
+from tab.models import Tab
+from menuFacil.validation import contains, valid_uuid
 from .models import Order
 
 # Create your views here.
-@login_required(login_url="/account/login/")
-def create_order(request: HttpRequest) -> HttpResponse:
-    cart = Cart.objects.filter(client=request.user)
-    restaurant = cart.first().food.menu.restaurant
+@require_POST
+def create(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['cart', 'tab']):
+        return JsonResponse({"success": False}, status=400)
+
+    cart = get_object_or_404(Cart, id=request.POST['cart'])
+    if cart.restaurant is None:
+        return JsonResponse({"success": False}, status=404)
+
+    if not valid_uuid(request.POST['tab']):
+        return JsonResponse({"success": False}, status=412)
+    try:
+        tab = Tab.objects.get(id=request.POST['tab'])
+    except KeyError:
+        return JsonResponse({"success": False}, status=412)
+
+    if tab.restaurant is None:
+        tab.restaurant = cart.restaurant
+        tab.save()
+    elif tab.restaurant.id != cart.restaurant.id:
+        messages.error(request, 'Cannot order from multiple restaurant to tab')
+        return JsonResponse({"success": False}, status=406)
+
+    # Create the order
     order = Order.objects.create(
-        client=request.user,
-        restaurant=restaurant,
-        total_price=sum(item.quantity * item.food.price for item in cart),
-        status = Order.StatusType.OPEN,
+        tab=tab,
+        restaurant=cart.restaurant,
+        status = Order.StatusType.MADE,
     )
     order.save()
-    for item in cart:
-        order.item_set.create(
-            food=item.food,
-            quantity=item.quantity,
-            price=item.price,
-        )
-    cart.delete()
-    ctx = {
-            'order': order, 'restaurant': restaurant, 
-            'messages':get_messages(request), 
-            'cart_length': Cart.get_cart_length(request.user)
-        }
-    return render(request, 'order/validate.html', ctx)
 
-@login_required(login_url="/account/login/")
-def confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    # if not request.user.is_staff:
-        # return HttpResponse('Unauthorized', status=401)
-        
-    order = get_object_or_404(Order, id=order_id)
-    order.status = Order.StatusType.MADE
-    order.save()
-    return redirect('order:pay_order', order_id=order.id)
+    # Add items to order and remove from cart
+    item: Item
+    for item in cart.item_set.all(): # type: ignore
+        item.order = order
+        item.cart = None
+        item.save()
 
-@login_required(login_url="/account/login/")
-def list_orders(request: HttpRequest) -> HttpResponse:
-    orders = Order.objects.filter(client=request.user)
-    orders = orders.order_by('-created_at')
-    ctx = {
-            'orders': orders,
-            "open": Order.StatusType.OPEN,
-            'messages':get_messages(request),
-            'cart_length': Cart.get_cart_length(request.user)
-        }
-    
-    return render(request, 'order/list.html', ctx)
+    cart.restaurant = None
+    cart.save()
+    return JsonResponse({"success": True}, status=200)
 
-@login_required(login_url="/account/login/")
-def details_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/details.html', {'order': order, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
-    
-@login_required(login_url="/account/login/")
-def reopen_confirm_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
+@require_POST
+def cancel(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['order']):
+        return JsonResponse({"success": False}, status=400)
 
-@login_required(login_url="/account/login/")
-def cancel_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'cancel': True, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
-
-@login_required(login_url="/account/login/")
-def cancel_order_confirm(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = get_object_or_404(Order, id=order_id)
+    order = get_object_or_404(Order, id=request.POST['order'])
+    if order.status == Order.StatusType.MADE:
+        order.status = Order.StatusType.CANCELLED
+        order.save()
+        return JsonResponse({"success": True}, status=200)
     order.pending_cancellation = True
     order.save()
-    return redirect('order:list_orders')
-
-@login_required(login_url="/account/login/")
-def pay_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order/validate.html', {'order': order, 'restaurant': order.restaurant, 'pay': True, 'messages':get_messages(request), 'cart_length': Cart.get_cart_length(request.user)})
-
-@login_required(login_url="/account/login/")
-def payed_order(request: HttpRequest, order_id: UUID) -> HttpResponse:
-    order = get_object_or_404(Order, id=order_id)
-    order.payed = True
-    order.save()
-    return redirect('order:list_orders')
+    return JsonResponse({"success": True}, status=200)

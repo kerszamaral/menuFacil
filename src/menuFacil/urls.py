@@ -19,8 +19,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.static import serve
 
-from . import views
-from menuFacil import settings
+from . import views, settings
 
 admin.site.site_title = "Menu Fácil site admin"
 admin.site.site_header = "Menu Fácil administration"
@@ -33,6 +32,7 @@ urlpatterns = [
     path("cart/", include("cart.urls")),
     path("order/", include("order.urls")),
     path("restaurant/", include("restaurant.urls")),
+    path("tab/", include("tab.urls"))
 ]
 
 if settings.DEBUG:

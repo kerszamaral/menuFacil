@@ -1,73 +1,99 @@
-from uuid import UUID
-from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib import messages
-from django.urls import reverse
-from django.contrib.messages import get_messages
+from django.views.decorators.http import require_POST
+from restaurant.models import Food, Restaurant
 
-from .models import Cart
+from menuFacil.validation import contains
+
+from item.models import Item
+from .models import Cart, CART_KEY
 
 # Create your views here.
-@login_required(login_url="/account/login/")
-def add_to_cart(request: HttpRequest, restaurant_id: int, food_id: UUID) -> HttpResponse:
-    cart_item = Cart.objects.filter(client=request.user, food_id=food_id).first()
-    if cart_item:
-        cart_item.quantity += 1
-        cart_item.price = cart_item.food.price * cart_item.quantity 
-        cart_item.save()
-        messages.success(request, 'Item added to cart')
+@require_POST
+def add(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['food', 'restaurant']):
+        return JsonResponse({"success": False}, status=400)
+
+    if request.user.is_authenticated:
+        request.session[CART_KEY] = str(request.user.cart.id) # type: ignore
+
+    (cart, created)= Cart.objects.get_or_create(id=request.session.get(CART_KEY, None),
+                        defaults={'client': request.user if request.user.is_authenticated else None}
+                    )
+    if created:
+        request.session[CART_KEY] = str(cart.id)
+
+    if cart.restaurant is None:
+        cart.restaurant = Restaurant.objects.get(id=request.POST['restaurant'])
+    elif str(cart.restaurant.id) != request.POST['restaurant']:
+        messages.error(request, 'Cannot add items from multiple restaurant to cart')
+        return JsonResponse({"success": False}, status=406)
+
+    cart.save()
+
+    # We use filter and first because if it doesn't find it returns None
+    item: Item = cart.item_set.filter(food_id=request.POST['food']).first() # type: ignore
+
+    if item is None:
+        food = get_object_or_404(Food, id=request.POST['food'])
+        item = cart.item_set.create( # type: ignore
+            food=food,
+            order=None,
+            price=food.get_price(),
+        )
     else:
-        cart_item = Cart.objects.create(client=request.user, food_id=food_id)
-        cart_item.price = cart_item.food.price * cart_item.quantity 
-        cart_item.save()
-        messages.success(request, 'Item added to cart')
-    return HttpResponseRedirect(reverse('restaurant:detail', args=(restaurant_id,)))
+        item.quantity += 1
+        item.save()
 
-@login_required(login_url="/account/login/")
-def increase_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
-    cart_item = get_object_or_404(Cart, client=request.user, food_id=food_id)
-    if cart_item.client == request.user:
-        cart_item.quantity += 1
-        cart_item.price = cart_item.food.price * cart_item.quantity 
-        cart_item.save()
-        messages.success(request, 'Item quantity increased')
-    return redirect("cart:cart_detail")
+    messages.success(request, 'Item added to cart')
+    return JsonResponse({"success": True}, status=200)
 
-@login_required(login_url="/account/login/")
-def decrease_quantity(request: HttpRequest, food_id: UUID) -> HttpResponse:
-    cart_item = get_object_or_404(Cart, client=request.user, food_id=food_id)
-    if cart_item.client == request.user:
-        if cart_item.quantity > 1:
-            cart_item.quantity -= 1
-            cart_item.price = cart_item.food.price * cart_item.quantity 
-            cart_item.save()
-            messages.success(request, 'Item quantity decreased')
-        else:
-            cart_item.delete()
-            messages.success(request, 'Item removed from cart')
-    return redirect("cart:cart_detail")
+@require_POST
+def increase_quantity(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['item']):
+        return JsonResponse({"success": False}, status=400)
 
-@login_required(login_url="/account/login/")
-def remove_from_cart(request: HttpRequest, food_id: UUID) -> HttpResponse:
-    cart_item = get_object_or_404(Cart, client=request.user, food_id=food_id)
+    item = get_object_or_404(Item, id=request.POST['item'])
+    item.quantity += 1
+    item.save()
+    messages.success(request, 'Item quantity increased')
+    return JsonResponse({"success": True}, status=200)
 
-    if cart_item.client == request.user:
-        cart_item.delete()
+@require_POST
+def decrease_quantity(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['item']):
+        return JsonResponse({"success": False}, status=400)
+
+    item = get_object_or_404(Item, id=request.POST['item'])
+    if item.quantity > 1:
+        item.quantity -= 1
+        item.save()
+        messages.success(request, 'Item quantity decreased')
+    else:
+        item.delete()
         messages.success(request, 'Item removed from cart')
+    return JsonResponse({"success": True}, status=200)
 
-    return redirect("cart:cart_detail")
+@require_POST
+def remove(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['item']):
+        return JsonResponse({"success": False}, status=400)
 
-@login_required(login_url="/account/login/")
-def cart_detail(request: HttpRequest) -> HttpResponse:
-    cart = Cart.objects.filter(client=request.user)
-    total_price = sum(item.quantity * item.food.price for item in cart)
+    item = get_object_or_404(Item, id=request.POST['item'])
 
-    context = {
-        'cart_items': cart,
-        'total_price': total_price,
-        'messages':get_messages(request),
-        'cart_length': sum(item.quantity for item in cart)
-    }
+    item.delete()
+    messages.success(request, 'Item removed from cart')
+    return JsonResponse({"success": True}, status=200)
 
-    return render(request, 'cart/cart_detail.html', context)
+def details(request: HttpRequest) -> HttpResponse:
+    if request.user.is_authenticated:
+        request.session[CART_KEY] = str(request.user.cart.id) # type: ignore
+
+    (cart, created)= Cart.objects.get_or_create(id=request.session.get(CART_KEY, None),
+                        defaults={'client': request.user if request.user.is_authenticated else None}
+                    )
+    if created:
+        request.session[CART_KEY] = str(cart.id)
+
+    return render(request, 'cart/details.html', {'cart': cart})

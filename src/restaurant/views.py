@@ -1,11 +1,13 @@
+import io
 from typing import Any
+from uuid import UUID
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.contrib.messages import get_messages
-
-from cart.models import Cart
+from django.http import FileResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 from .models import Restaurant
 
@@ -16,19 +18,25 @@ class RestaurantsView(generic.ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return Restaurant.objects.order_by('name')
-    
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-        if self.request.user.is_authenticated:
-            ctx = {**ctx, 'cart_length':  Cart.get_cart_length(self.request.user)}
-        return ctx
 
-
-def menu(request: HttpRequest, restaurant_id: int) -> HttpResponse:
+def menu(request: HttpRequest, restaurant_id: UUID) -> HttpResponse:
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
-    ctx = {'restaurant': restaurant, 'messages':get_messages(request)}
-    if request.user.is_authenticated:
-        ctx = {**ctx, 'cart_length': Cart.get_cart_length(request.user)}
-        
-    return render(request, 'restaurant/detail.html', ctx)
-        
+
+    return render(request, 'restaurant/detail.html', {'restaurant': restaurant})
+
+def create_pdf(html, name: str) -> FileResponse:
+    buffer = io.BytesIO()
+    pdf = pisa.pisaDocument(io.BytesIO(html.encode("ISO-8859-1")), buffer)
+    buffer.seek(0)
+    if not pdf.err: # type: ignore
+        return FileResponse(buffer, as_attachment=True, filename= f"{name}.pdf")
+    return FileResponse('Error Rendering PDF', status=400)
+
+def get_qrcode(request: HttpRequest, tab_id: UUID) -> FileResponse:
+    html = get_template('restaurant/qrcode.html').render({'tab_id': str(tab_id)})
+    return create_pdf(html, f"{str(tab_id).split('-')[0]}-qrcode")
+
+def sales(request: HttpRequest, restaurant_id: UUID):
+    restaurant = Restaurant.objects.get(pk=restaurant_id)
+    html = get_template('restaurant/sales.html').render({'restaurant': restaurant})
+    return create_pdf(html, f"{restaurant.name}-sales")

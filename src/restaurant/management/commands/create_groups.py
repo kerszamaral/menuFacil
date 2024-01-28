@@ -1,32 +1,44 @@
+from typing import Any
 from django.core.management import BaseCommand
 from django.contrib.auth.models import Group, Permission
 
 from restaurant import models as restaurant_models
 from order import models as order_models
+from item import models as item_models
+from tab import models as tab_models
 
 GROUPS_PERMISSIONS = {
     'owner': {
         "userobjectpermission": ['add', 'change', 'delete', 'view'],
+        restaurant_models.Promotion: ['add', 'change', 'delete', 'view'],
         restaurant_models.Menu: ['add', 'change', 'delete', 'view'],
         restaurant_models.Food: ['add', 'change', 'delete', 'view'],
-        order_models.Order: ['change', 'view'],
+        order_models.Order: ['change', 'view', 'delete'],
+        tab_models.Tab: ['add', 'view'],
+        item_models.Item: ['view'],
     },
     'manager': {
+        restaurant_models.Promotion: ['add', 'change', 'delete', 'view'],
         restaurant_models.Menu: ['add', 'change', 'delete', 'view'],
         restaurant_models.Food: ['add', 'change', 'delete', 'view'],
-        order_models.Order: ['change', 'view'],
+        order_models.Order: ['change', 'view', 'delete'],
+        tab_models.Tab: ['add', 'view'],
+        item_models.Item: ['view'],
     },
     'employee': {
+        restaurant_models.Promotion: ['view'],
         restaurant_models.Menu: ['view'],
         restaurant_models.Food: ['view'],
         order_models.Order: ['change', 'view'],
+        tab_models.Tab: ['view'],
+        item_models.Item: ['view'],
     },
 }
 
 class Command(BaseCommand):
     help = "Create default groups"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> str | None:
         # Loop groups
         for groups in GROUPS_PERMISSIONS.items():
             group_name = groups[0]

@@ -165,3 +165,10 @@ cython_debug/
 
 # Media
 src/media
+
+# SSL
+src/*.crt
+src/*.key
+
+# restaurants
+restaurants/

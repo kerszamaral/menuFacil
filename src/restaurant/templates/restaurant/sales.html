@@ -1,0 +1,31 @@
+{% load static %}
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body style="margin:0">
+    <main>
+      <div>
+        {% if restaurant %}
+          <h1>{{ restaurant.name }}</h1>
+          {% now 'd/m/Y H:i' %}
+          {% if restaurant.get_most_popular_foods %}
+            <h2>Most Popular Food</h2>
+            {% for food in restaurant.get_most_popular_foods %}
+              <p>{{ food.name }} - {{ food.get_total_sales }} -  R${{ food.get_total_sales_amount|floatformat:2 }}</p>
+            {% endfor %}
+            <h2>Total Sales</h2>
+            <p>{{ restaurant.get_total_sales }}</p>
+            <h2>Total Sales Amount</h2>
+            <p>R${{ restaurant.get_total_sales_amount|floatformat:2 }}</p>
+          {% else %}
+            <h2>No Sales Reported</h2>
+          {% endif %}
+        {% else %}
+          <h1>Error Displaying Sales</h1>
+        {% endif %}
+      </div>
+    </main>
+  </body>
+</html>

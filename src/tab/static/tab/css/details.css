@@ -1,0 +1,175 @@
+.comanda {
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pay-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 40px;
+}
+button.accordion {
+    width: 50%;
+    background-color: whitesmoke;
+    border: none;
+    outline: none;
+    text-align: left;
+    padding: 0px 10px;
+    font-size: 18px;
+    color: #444;
+    cursor: pointer;
+    transition: background-color 0.2s linear;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button.accordion:after {
+    content: '\f055';
+    font-family: "fontawesome";
+    float: right;
+}
+
+button.accordion.is-open:after {
+    content: '\f056';
+}
+
+button.accordion:hover,
+button.accordion.is-open {
+    background-color: #ddd;
+}
+
+.accordion-content {
+    background-color: white;
+    border-left: 1px solid whitesmoke;
+    border-right: 1px solid whitesmoke;
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    width: 50rem;
+    gap: 20px;
+}
+
+.container {
+    margin: 5vh 5vw 5vh 5vw;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    font-size: 25px;
+}
+
+.container a {
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 25px;
+    margin-bottom: 0px;
+}
+
+.container a:hover {
+    background-color: #009879;
+    color: white;
+}
+
+.details {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.details table tr td {
+    padding: 5px 5px;
+    margin: 0px 0px;
+}
+
+.details table tr td:first-child {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: right
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 40px;
+}
+
+.button-danger a {
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 25px;
+    margin-bottom: 0px;
+}
+
+.button-danger a:hover {
+    background-color: darkred;
+    color: white;
+}
+
+.table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.table th,
+.table td {
+    padding: 15px 19px;
+    text-align: center;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.button a {
+    background-color: whitesmoke;
+    padding: 10px 10px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 25px;
+    margin-bottom: 0px;
+}
+
+.button a:hover {
+    background-color: #009879;
+    color: white;
+}

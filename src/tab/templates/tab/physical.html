@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load qr_code %}
+
+{% block title %}
+  Pay Physically
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'tab/css/details.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="comanda">
+    {% if tab_id %}
+      <h1>Show This QRCode to the Cashier</h1>
+      {% qr_from_text tab_id size="M" %}
+      <div class="button">
+        <a href="{% url 'tab:payed' %}">Done</a>
+      </div>
+    {% else %}
+      <h1>There is no tab to pay</h1>
+    {% endif %}
+  </div>
+{% endblock %}
