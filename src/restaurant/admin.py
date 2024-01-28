@@ -148,10 +148,10 @@ class MakingOrdersInline(OrdersInline):
               ).exclude(status=Order.StatusType.DELIVERED)
         return qs.order_by('-updated_at')
 
-class PromotionInline(admin.TabularInline, EditLinkToInlineObject):
+class PromotionInline(admin.TabularInline):
     model = Promotion
     extra = 0
-    readonly_fields = ('edit_link',)
+    filter_horizontal = ('menu',)
 
 class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     model = Menu
