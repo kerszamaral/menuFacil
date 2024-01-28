@@ -1,3 +1,4 @@
+from typing import Any
 from django.core.management import BaseCommand
 from django.contrib.auth.models import Group, Permission
 
@@ -26,7 +27,7 @@ GROUPS_PERMISSIONS = {
 class Command(BaseCommand):
     help = "Create default groups"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> str | None:
         # Loop groups
         for groups in GROUPS_PERMISSIONS.items():
             group_name = groups[0]

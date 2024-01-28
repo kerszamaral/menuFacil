@@ -169,3 +169,6 @@ src/media
 # SSL
 src/*.crt
 src/*.key
+
+# restaurants
+restaurants/
