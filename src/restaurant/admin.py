@@ -1,3 +1,4 @@
+from typing import Any
 from django.contrib import admin, messages
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
@@ -6,6 +7,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
+from guardian.core import ObjectPermissionChecker
 from django_object_actions import DjangoObjectActions
 
 
@@ -15,10 +17,10 @@ from tab.models import Tab
 from .models import Promotion, Restaurant, Menu, Food
 
 class LockedModel(object):
-    def has_add_permission(self, request, obj=None) -> bool:
+    def has_add_permission(self, request, obj=None) -> bool: # pylint: disable=unused-argument
         return False
 
-    def has_delete_permission(self, request, obj=None) -> bool:
+    def has_delete_permission(self, request, obj=None) -> bool:  # pylint: disable=unused-argument
         return False
 
 
@@ -97,31 +99,67 @@ class ItemInline(LockedModel, admin.TabularInline):
     model = Item
     extra = 0
     can_delete = False
-    readonly_fields = ('food', 'quantity', 'price')
+    readonly_fields = ('cart', 'food', 'quantity', 'price')
 
 @admin.register(Order)
-class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, admin.ModelAdmin, EditLinkToInlineObject):
+class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, GuardedModelAdmin):
     inlines = [ItemInline]
-    readonly_fields = ('pending_cancellation',
+    readonly_fields = ('status', 
+                       'pending_cancellation',
                        'created_at',
                        'updated_at')
 
+    def save_model(self, request: Any, obj: Any, form: Any, change: Any) -> None:
+        if obj.status == Order.StatusType.CANCELLED:
+            self.message_user(request, "You don't have permission to cancel this order")
+            return
+        return super().save_model(request, obj, form, change)
+
+    def get_model_objects(self, request: HttpRequest, action=None, klass=None):
+        opts = self.opts
+        actions = [action] if action else ['view', 'add', 'change', 'delete']
+        klass = klass or opts.model
+        model_name = klass._meta.model_name
+        return get_objects_for_user(user=request.user,
+                                    perms=[f'{perm}_{model_name}' for perm in actions],
+                                    klass=klass, any_perm=True)
+
     def approve_cancellation(self, request, obj):
-        if obj.pending_cancellation and obj.status == Order.StatusType.OPEN:
+        if not self.get_model_objects(request, action='delete').exists():
+            self.message_user(request, "You don't have permission to cancel this order")
+            return
+        if obj.pending_cancellation and obj.status in [Order.StatusType.MADE, Order.StatusType.IN_PROGRESS]:
             obj.status = Order.StatusType.CANCELLED
             obj.save()
             self.message_user(request, "Order cancelled")
         else:
             self.message_user(request, "Order not pending cancellation")
 
-    change_actions = ('approve_cancellation',)
+    def in_progress(self, request, obj):
+        if obj.status == Order.StatusType.MADE:
+            obj.status = Order.StatusType.IN_PROGRESS
+            obj.save()
+            self.message_user(request, "Order in progress")
+        else:
+            self.message_user(request, "Couldn't change order status")
+
+    def delivered(self, request, obj):
+        if obj.status == Order.StatusType.IN_PROGRESS:
+            obj.status = Order.StatusType.DELIVERED
+            obj.save()
+            self.message_user(request, "Order delivered")
+        else:
+            self.message_user(request, "Couldn't change order status")
+
+    change_actions = ('approve_cancellation','in_progress', 'delivered')
 
 class OrdersInline(LockedModel, admin.TabularInline):
     model = Order
     extra = 0
 
     can_delete = False
-    readonly_fields = ('pending_cancellation', 
+    readonly_fields = ('status',
+                       'pending_cancellation',
                        'created_at',
                        'updated_at', 'details_link')
 
@@ -143,8 +181,7 @@ class MakingOrdersInline(OrdersInline):
     verbose_name = "Order in the Making"
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super(OrdersInline, self).get_queryset(request)
-        qs = qs.exclude(status=Order.StatusType.OPEN
-              ).exclude(status=Order.StatusType.CANCELLED
+        qs = qs.exclude(status=Order.StatusType.CANCELLED
               ).exclude(status=Order.StatusType.DELIVERED)
         return qs.order_by('-updated_at')
 
@@ -172,7 +209,7 @@ class TabInline(admin.TabularInline):
 
 
 @admin.register(Restaurant)
-class RestaurantAdmin(DjangoObjectActions, GuardedModelAdmin):
+class RestaurantAdmin(DjangoObjectActions, PermissionCheckModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
@@ -180,13 +217,22 @@ class RestaurantAdmin(DjangoObjectActions, GuardedModelAdmin):
     inlines = [MenuInline, PromotionInline, MakingOrdersInline, OrdersInline, TabInline]
 
     def create_tab(self, request: HttpRequest, obj):
+        if not self.get_model_objects(request, action='add', klass=Tab).exists():
+            self.message_user(request, "You don't have permission to create tabs")
+            return
         Tab.objects.create(restaurant=obj)
         messages.success(request, 'Tab created')
 
     def generate_sales_report(self, request: HttpRequest, obj):
+        if not self.get_model_objects(request, action='add', klass=Menu).exists():
+            self.message_user(request, "You don't have permission to see sales report")
+            return
         return redirect(reverse('restaurant:sales', args=[obj.pk]))
 
     # Needed because of bug in django-object-actions
     def object_permissions(self, request: HttpRequest, obj):
+        if not ObjectPermissionChecker(request.user).has_perm('change_restaurant', obj):
+            self.message_user(request, "You don't have permission to change permissions")
+            return
         return redirect(reverse(f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
                       args=[obj.pk] ))
