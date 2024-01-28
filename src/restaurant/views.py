@@ -24,11 +24,19 @@ def menu(request: HttpRequest, restaurant_id: UUID) -> HttpResponse:
 
     return render(request, 'restaurant/detail.html', {'restaurant': restaurant})
 
-def get_qrcode(request: HttpRequest, tab_id: UUID):
-    template = get_template('restaurant/qrcode.html')
-    html = template.render({'tab_id': tab_id})
+def create_pdf(html, name: str) -> FileResponse:
     buffer = io.BytesIO()
     pdf = pisa.pisaDocument(io.BytesIO(html.encode("ISO-8859-1")), buffer)
     buffer.seek(0)
-    if not pdf.err:
-        return FileResponse(buffer, as_attachment=True, filename= str(tab_id).split('-')[0] + ".pdf")
+    if not pdf.err: # type: ignore
+        return FileResponse(buffer, as_attachment=True, filename= f"{name}.pdf")
+    return FileResponse('Error Rendering PDF', status=400)
+
+def get_qrcode(request: HttpRequest, tab_id: UUID) -> FileResponse:
+    html = get_template('restaurant/qrcode.html').render({'tab_id': tab_id})
+    return create_pdf(html, f"{str(tab_id).split('-')[0]}-qrcode")
+
+def sales(request: HttpRequest, restaurant_id: UUID):
+    restaurant = Restaurant.objects.get(pk=restaurant_id)
+    html = get_template('restaurant/sales.html').render({'restaurant': restaurant})
+    return create_pdf(html, f"{restaurant.name}-sales")

@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.shortcuts import redirect, resolve_url
@@ -176,11 +176,15 @@ class RestaurantAdmin(DjangoObjectActions, GuardedModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
-    change_actions = ['object_permissions', 'create_tab' ]
+    change_actions = ['object_permissions', 'create_tab', 'generate_sales_report' ]
     inlines = [MenuInline, PromotionInline, MakingOrdersInline, OrdersInline, TabInline]
 
     def create_tab(self, request: HttpRequest, obj):
         Tab.objects.create(restaurant=obj)
+        messages.success(request, 'Tab created')
+
+    def generate_sales_report(self, request: HttpRequest, obj):
+        return redirect(reverse('restaurant:sales', args=[obj.pk]))
 
     # Needed because of bug in django-object-actions
     def object_permissions(self, request: HttpRequest, obj):

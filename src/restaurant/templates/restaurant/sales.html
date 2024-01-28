@@ -1,5 +1,4 @@
 {% load static %}
-{% load qr_code %}
 
 <html>
   <head>
@@ -8,10 +7,10 @@
   <body style="margin:0">
     <main>
       <div>
-        {% if tab_id %}
-          {% qr_from_text tab_id size = 'M' image_format = 'png' %}
+        {% if restaurant %}
+          <h1>{{ restaurant.name }}</h1>
         {% else %}
-          <h1>Error Displaying QRCode</h1>
+          <h1>Error Displaying Sales</h1>
         {% endif %}
       </div>
     </main>
