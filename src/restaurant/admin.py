@@ -3,7 +3,7 @@ from django.contrib import admin, messages
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.shortcuts import redirect, resolve_url
-from django.urls import reverse
+from django.urls import resolve, reverse
 from django.utils.safestring import mark_safe
 from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
@@ -82,18 +82,17 @@ class FoodInline(admin.TabularInline):
     list_display = ('name', 'price')
     extra = 1
 
-@admin.register(Promotion)
-class PromotionAdmin(HiddenModel, admin.ModelAdmin):
-    list_display = ('name', 'discount', 'active')
-    list_filter = ['active']
-    search_fields = ['name']
-
 @admin.register(Menu)
 class MenuAdmin(HiddenModel, admin.ModelAdmin):
     inlines = [FoodInline]
     list_display = ('restaurant', 'name')
     list_filter = ['restaurant']
     search_fields = ['name']
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        if request.user.is_superuser:
+            return super().get_queryset(request)
+        return Menu.objects.none()
 
 class ItemInline(LockedModel, admin.TabularInline):
     model = Item
@@ -152,6 +151,11 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, GuardedModelAdmi
             self.message_user(request, "Couldn't change order status")
 
     change_actions = ('approve_cancellation','in_progress', 'delivered')
+    
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        if request.user.is_superuser:
+            return super().get_queryset(request)
+        return Order.objects.none()
 
 class OrdersInline(LockedModel, admin.TabularInline):
     model = Order
@@ -189,6 +193,23 @@ class PromotionInline(admin.TabularInline):
     model = Promotion
     extra = 0
     filter_horizontal = ('menu',)
+    
+    def get_parent_object_from_request(self, request):
+        """
+        Returns the parent object from the request or None.
+
+        Note that this only works for Inlines, because the `parent_model`
+        is not available in the regular admin.ModelAdmin as an attribute.
+        """
+        resolved = resolve(request.path_info)
+        if resolved.kwargs:
+            return self.parent_model.objects.get(pk=resolved.kwargs['object_id'])
+        return None
+    
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        kwargs['queryset'] = Menu.objects.filter(restaurant=self.get_parent_object_from_request(request))
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 class MenuInline(admin.TabularInline, EditLinkToInlineObject):
     model = Menu
@@ -231,7 +252,7 @@ class RestaurantAdmin(DjangoObjectActions, PermissionCheckModelAdmin):
 
     # Needed because of bug in django-object-actions
     def object_permissions(self, request: HttpRequest, obj):
-        if not ObjectPermissionChecker(request.user).has_perm('change_restaurant', obj):
+        if not ObjectPermissionChecker(request.user).has_perm('delete_restaurant', obj):
             self.message_user(request, "You don't have permission to change permissions")
             return
         return redirect(reverse(f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",

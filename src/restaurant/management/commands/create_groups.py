@@ -14,7 +14,7 @@ GROUPS_PERMISSIONS = {
         restaurant_models.Menu: ['add', 'change', 'delete', 'view'],
         restaurant_models.Food: ['add', 'change', 'delete', 'view'],
         order_models.Order: ['change', 'view', 'delete'],
-        tab_models.Tab: ['add'],
+        tab_models.Tab: ['add', 'view'],
         item_models.Item: ['view'],
     },
     'manager': {
@@ -22,7 +22,7 @@ GROUPS_PERMISSIONS = {
         restaurant_models.Menu: ['add', 'change', 'delete', 'view'],
         restaurant_models.Food: ['add', 'change', 'delete', 'view'],
         order_models.Order: ['change', 'view', 'delete'],
-        tab_models.Tab: ['add'],
+        tab_models.Tab: ['add', 'view'],
         item_models.Item: ['view'],
     },
     'employee': {
@@ -30,6 +30,7 @@ GROUPS_PERMISSIONS = {
         restaurant_models.Menu: ['view'],
         restaurant_models.Food: ['view'],
         order_models.Order: ['change', 'view'],
+        tab_models.Tab: ['view'],
         item_models.Item: ['view'],
     },
 }
