@@ -17,7 +17,6 @@ class Order(models.Model):
     pending_cancellation = models.BooleanField(default=False)
 
     class StatusType(models.TextChoices):
-        OPEN = ("OP", "Open")
         MADE = ("MD", "Made")
         IN_PROGRESS = ("IP", "In Progress")
         DELIVERED = ("DV", "Delivered")
@@ -29,7 +28,7 @@ class Order(models.Model):
     status = models.CharField(
         max_length=2,
         choices=StatusType.choices,
-        default=StatusType.OPEN,
+        default=StatusType.MADE,
     )
 
     def get_length(self) -> int:
@@ -39,4 +38,4 @@ class Order(models.Model):
         return sum(item.get_total_price() for item in self.item_set.all()) # type: ignore
 
     def __str__(self):
-        return f'{self.tab.id} - {self.get_total_price()} - {self.created_at.strftime(" %H:%M %d/%m/%Y")}'  # pylint: disable=maybe-no-member # type: ignore
+        return f'{self.get_total_price()} - {self.created_at.strftime(" %H:%M %d/%m/%Y")}'  # pylint: disable=maybe-no-member # type: ignore

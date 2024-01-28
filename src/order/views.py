@@ -58,6 +58,10 @@ def cancel(request: HttpRequest) -> HttpResponse:
         return JsonResponse({"success": False}, status=400)
 
     order = get_object_or_404(Order, id=request.POST['order'])
+    if order.status == Order.StatusType.MADE:
+        order.status = Order.StatusType.CANCELLED
+        order.save()
+        return JsonResponse({"success": True}, status=200)
     order.pending_cancellation = True
     order.save()
     return JsonResponse({"success": True}, status=200)
