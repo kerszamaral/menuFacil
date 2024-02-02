@@ -82,10 +82,9 @@
                       <a href="{% url 'restaurant:index' %}">Home</a>
                       {% if user.is_authenticated %}
 
-                        {% if user.is_staff %}
-                          <a href="{% url 'admin:index' %}">Admin</a>
-                          <a href="{% url 'tab:confirm' %}">Confirm Payment</a>
-                        {% endif %}
+            {% if user.is_staff %}
+              <a href="{% url 'admin:index' %}">Admin</a>
+            {% endif %}
 
                         <a href="{% url 'tab:history' %}">History</a>
 

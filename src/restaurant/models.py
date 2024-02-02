@@ -83,10 +83,10 @@ class Food(models.Model):
     def get_price(self) -> Decimal:
         best_promotion = self.menu.get_best_promotion()  if self.menu else None
         return self.price if not best_promotion else self.price * (1 - best_promotion.discount / 100)
-    
+
     def get_total_sales(self) -> int:
         return self.item_set.aggregate(models.Sum('quantity'))['quantity__sum'] or 0 # type: ignore
-    
+
     def get_total_sales_amount(self) -> Decimal:
         return self.item_set.aggregate(models.Sum('price'))['price__sum'] or Decimal(0) # type: ignore
 

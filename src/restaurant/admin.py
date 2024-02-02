@@ -1,3 +1,4 @@
+from operator import contains
 from typing import Any
 from django.contrib import admin, messages
 from django.db.models.query import QuerySet
@@ -9,12 +10,14 @@ from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
 from guardian.core import ObjectPermissionChecker
 from django_object_actions import DjangoObjectActions
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 
 from order.models import Order
 from item.models import Item
 from tab.models import Tab
 from .models import Promotion, Restaurant, Menu, Food
+from tab.views import tab_has_been_payed
 
 class LockedModel(object):
     def has_add_permission(self, request, obj=None) -> bool: # pylint: disable=unused-argument
@@ -89,10 +92,20 @@ class MenuAdmin(HiddenModel, admin.ModelAdmin):
     list_filter = ['restaurant']
     search_fields = ['name']
 
+    def get_model_objects(self, request: HttpRequest, action=None, klass=None):
+        opts = self.opts
+        actions = [action] if action else ['view', 'add', 'change', 'delete']
+        klass = klass or opts.model
+        model_name = klass._meta.model_name
+        return get_objects_for_user(user=request.user,
+                                    perms=[f'{perm}_{model_name}' for perm in actions],
+                                    klass=klass, any_perm=True)
+
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        qs = super().get_queryset(request)
         if request.user.is_superuser:
-            return super().get_queryset(request)
-        return Menu.objects.none()
+            return qs
+        return qs.filter(restaurant__in=self.get_model_objects(request, action='view', klass=Restaurant))
 
 class ItemInline(LockedModel, admin.TabularInline):
     model = Item
@@ -103,7 +116,7 @@ class ItemInline(LockedModel, admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, GuardedModelAdmin):
     inlines = [ItemInline]
-    readonly_fields = ('status', 
+    readonly_fields = ('status',
                        'pending_cancellation',
                        'created_at',
                        'updated_at')
@@ -124,9 +137,6 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, GuardedModelAdmi
                                     klass=klass, any_perm=True)
 
     def approve_cancellation(self, request, obj):
-        if not self.get_model_objects(request, action='delete').exists():
-            self.message_user(request, "You don't have permission to cancel this order")
-            return
         if obj.pending_cancellation and obj.status in [Order.StatusType.MADE, Order.StatusType.IN_PROGRESS]:
             obj.status = Order.StatusType.CANCELLED
             obj.save()
@@ -150,12 +160,37 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, GuardedModelAdmi
         else:
             self.message_user(request, "Couldn't change order status")
 
-    change_actions = ('approve_cancellation','in_progress', 'delivered')
-    
+    change_actions = ['approve_cancellation', 'in_progress', 'delivered']
+
+    def get_change_actions(self, request, object_id, form_url):
+        actions: list[str] = super().get_change_actions(request, object_id, form_url)
+
+        obj = self.get_object(request, object_id)
+
+        if obj is None:
+            return []
+
+        can_approve_cancellation = self.get_model_objects(request, action='delete').exists()
+        is_pending_cancellation = obj.pending_cancellation and obj.status in [Order.StatusType.MADE, Order.StatusType.IN_PROGRESS]
+        should_appear = can_approve_cancellation and is_pending_cancellation
+        if not should_appear and contains(actions, 'approve_cancellation'):
+            actions.remove('approve_cancellation')
+
+        isnt_in_made = obj.status != Order.StatusType.MADE
+        if  isnt_in_made and contains(actions, 'in_progress'):
+            actions.remove('in_progress')
+
+        isnt_in_progress = obj.status != Order.StatusType.IN_PROGRESS
+        if isnt_in_progress and contains(actions, 'delivered'):
+            actions.remove('delivered')
+
+        return actions
+
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        qs = super().get_queryset(request)
         if request.user.is_superuser:
-            return super().get_queryset(request)
-        return Order.objects.none()
+            return qs
+        return qs.filter(restaurant__in=self.get_model_objects(request, action='view', klass=Restaurant))
 
 class OrdersInline(LockedModel, admin.TabularInline):
     model = Order
@@ -193,7 +228,7 @@ class PromotionInline(admin.TabularInline):
     model = Promotion
     extra = 0
     filter_horizontal = ('menu',)
-    
+
     def get_parent_object_from_request(self, request):
         """
         Returns the parent object from the request or None.
@@ -205,7 +240,7 @@ class PromotionInline(admin.TabularInline):
         if resolved.kwargs:
             return self.parent_model.objects.get(pk=resolved.kwargs['object_id'])
         return None
-    
+
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         kwargs['queryset'] = Menu.objects.filter(restaurant=self.get_parent_object_from_request(request))
         return super().formfield_for_manytomany(db_field, request, **kwargs)
@@ -234,26 +269,101 @@ class RestaurantAdmin(DjangoObjectActions, PermissionCheckModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'address', 'phone', 'logo', 'message']}),
     ]
-    change_actions = ['object_permissions', 'create_tab', 'generate_sales_report' ]
+    change_actions = [
+                        'object_permissions',
+                        'create_tab',
+                        'generate_sales_report',
+                        'confirm_payment',
+                    ]
     inlines = [MenuInline, PromotionInline, MakingOrdersInline, OrdersInline, TabInline]
 
     def create_tab(self, request: HttpRequest, obj):
-        if not self.get_model_objects(request, action='add', klass=Tab).exists():
-            self.message_user(request, "You don't have permission to create tabs")
-            return
         Tab.objects.create(restaurant=obj)
         messages.success(request, 'Tab created')
 
     def generate_sales_report(self, request: HttpRequest, obj):
-        if not self.get_model_objects(request, action='add', klass=Menu).exists():
-            self.message_user(request, "You don't have permission to see sales report")
-            return
         return redirect(reverse('restaurant:sales', args=[obj.pk]))
+
+    def confirm_payment(self, request: HttpRequest, obj):
+        return redirect(reverse('tab:confirm'))
 
     # Needed because of bug in django-object-actions
     def object_permissions(self, request: HttpRequest, obj):
-        if not ObjectPermissionChecker(request.user).has_perm('delete_restaurant', obj):
-            self.message_user(request, "You don't have permission to change permissions")
-            return
         return redirect(reverse(f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
                       args=[obj.pk] ))
+
+    def get_change_actions(self, request, object_id, form_url):
+        actions: list[str] = super(RestaurantAdmin, self).get_change_actions(request, object_id, form_url)
+
+        obj = self.get_object(request, object_id)
+        can_edit_obj_perm = ObjectPermissionChecker(request.user).has_perm('delete_restaurant', obj)
+        if not can_edit_obj_perm and contains(actions, 'object_permissions'):
+            actions.remove('object_permissions')
+
+        can_create_tab = self.get_model_objects(request, action='add', klass=Tab).exists()
+        if not can_create_tab and contains(actions, 'create_tab'):
+            actions.remove('create_tab')
+
+        can_generate_sales_report = self.get_model_objects(request, action='add', klass=Menu).exists()
+        if not can_generate_sales_report and contains(actions, 'generate_sales_report'):
+            actions.remove('generate_sales_report')
+
+        return actions
+    
+class TabOrdersInline(GenericTabularInline):
+    model = Order
+    ct_fk_field = "tab_id"
+    ct_field = "tab_type"
+    extra = 0
+    max_num = 0
+    can_delete = False
+    readonly_fields = ('status', 'items', 'total_price')
+
+    def total_price(self, instance):
+        return instance.get_total_price()
+
+    def items(self, instance):
+        item_string = ""
+        for item in instance.item_set.all():
+            item_string += f"{item.food.name} x {item.quantity}\n"
+        return item_string
+
+@admin.register(Tab)
+class TabAdmin(DjangoObjectActions, HiddenModel, admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['restaurant_name', 'client_name', 'total_price']}),
+    ]
+    readonly_fields = ('restaurant_name', 'client_name', 'total_price')
+    inlines = [TabOrdersInline]
+
+    change_actions = ['confirm_payment']
+    
+    def restaurant_name(self, instance):
+        return instance.restaurant.name
+    
+    def client_name(self, instance):
+        return instance.client.username
+    
+    def total_price(self, instance):
+        return instance.get_total_price()
+
+    def confirm_payment(self, request, obj):
+        if tab_has_been_payed(str(obj.id)):
+            self.message_user(request, "Order paid")
+        else:
+            self.message_user(request, "Error paying order")
+            
+    def get_model_objects(self, request: HttpRequest, action=None, klass=None):
+        opts = self.opts
+        actions = [action] if action else ['view']
+        klass = klass or opts.model
+        model_name = klass._meta.model_name
+        return get_objects_for_user(user=request.user,
+                                    perms=[f'{perm}_{model_name}' for perm in actions],
+                                    klass=klass, any_perm=True)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(restaurant__in=self.get_model_objects(request, action='view', klass=Restaurant))

@@ -72,6 +72,10 @@ def decrease_quantity(request: HttpRequest) -> HttpResponse:
         messages.success(request, 'Item quantity decreased')
     else:
         item.delete()
+        cart = item.cart
+        if cart is not None and cart.item_set.count() == 0: # type: ignore
+            cart.restaurant = None
+            cart.save()
         messages.success(request, 'Item removed from cart')
     return JsonResponse({"success": True}, status=200)
 
@@ -81,8 +85,13 @@ def remove(request: HttpRequest) -> HttpResponse:
         return JsonResponse({"success": False}, status=400)
 
     item = get_object_or_404(Item, id=request.POST['item'])
+    cart = item.cart
 
     item.delete()
+    if cart is not None and cart.item_set.count() == 0: # type: ignore
+        cart.restaurant = None
+        cart.save()
+
     messages.success(request, 'Item removed from cart')
     return JsonResponse({"success": True}, status=200)
 
