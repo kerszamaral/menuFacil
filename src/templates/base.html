@@ -45,7 +45,6 @@
 
             {% if user.is_staff %}
               <a href="{% url 'admin:index' %}">Admin</a>
-              <a href="{% url 'tab:confirm' %}">Confirm Payment</a>
             {% endif %}
 
             <a href="{% url 'account:profile' %}">Account: {{ user.username }}</a>
