@@ -59,7 +59,7 @@ button.accordion.is-open {
     gap: 20px;
 }
 
-.container {
+.container-tab {
     margin: 5vh 5vw 5vh 5vw;
     align-items: center;
     display: flex;
@@ -68,7 +68,7 @@ button.accordion.is-open {
     font-size: 25px;
 }
 
-.container a {
+.container-tab a {
     background-color: whitesmoke;
     padding: 10px 10px;
     text-decoration: none;
@@ -79,7 +79,7 @@ button.accordion.is-open {
     margin-bottom: 0px;
 }
 
-.container a:hover {
+.container-tab a:hover {
     background-color: #009879;
     color: white;
 }

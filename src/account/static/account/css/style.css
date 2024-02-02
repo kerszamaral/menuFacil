@@ -1,4 +1,4 @@
-.container {
+.container-login {
     margin: 5vh 5vw 5vh 5vw;
     align-items: center;
     display: flex;
@@ -8,14 +8,14 @@
     font-size: 25px;
 }
 
-.container h1 {
+.container-login h1 {
     font-size: 50px;
     margin-bottom: 50px;
 }
 
-.container small,
+.container-login small,
 a {
-    margin-top: 100px;
+    
     text-decoration: none;
 }
 

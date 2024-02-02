@@ -11,8 +11,13 @@
 {% endblock %}
 
 {% block content %}
-  <div class="comanda">
-    <h1>Your History</h1>
+<body class="sub_page">
+
+  <div class="comanda" style="padding-bottom: 20vh">
+    <div class="heading_container heading_center" style="padding-top: 2vh; padding-bottom: 5vh">
+      <h1>Your History</h1>
+    </div>
+    
     {% if historic_tabs %}
         {% for tab in historic_tabs %}
         <button class="accordion">
@@ -111,4 +116,5 @@
       }
     }
   </script>
+</body>
 {% endblock %}

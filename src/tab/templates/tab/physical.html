@@ -11,7 +11,9 @@
 {% endblock %}
 
 {% block content %}
-  <div class="comanda">
+<body class="sub_page">
+  
+  <div class="comanda" style="padding: 10vh">
     {% if tab_id %}
       <h1>Show This QRCode to the Cashier</h1>
       {% qr_from_text tab_id size="M" %}
@@ -22,4 +24,5 @@
       <h1>There is no tab to pay</h1>
     {% endif %}
   </div>
+</body>
 {% endblock %}

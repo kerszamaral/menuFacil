@@ -4,7 +4,11 @@
 {% load cart_tags %}
 <html>
   <head>
+    <!-- Basic -->
     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <title>
       {% block title %}
@@ -12,9 +16,163 @@
       {% endblock %}
     </title>
 
-    <link rel="shortcut icon" type= "image/png" href="{% static 'menuFacil/images/favicon.ico' %}"/>
-    <link rel="stylesheet" href="{% static 'menuFacil/css/style.css' %}" />
+    <!-- bootstrap core css -->
+    <link rel="stylesheet" type="text/css" href="{% static 'menuFacil/css/bootstrap.css' %}" />
+
+    <!-- fonts style -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet">
+
+    <!-- font awesome style -->
+    <link href="{% static 'menuFacil/css/font-awesome.min.css' %}" rel="stylesheet" />
+    <!-- nice select -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css" integrity="sha256-mLBIhmBvigTFWPSCtvdu6a76T+3Xyt+K571hupeFLg4=" crossorigin="anonymous" />
+    <!-- slidck slider -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css" integrity="sha256-UK1EiopXIL+KVhfbFa8xrmAWPeBjMVdvYMYkTAEv/HI=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick-theme.min.css.map" integrity="undefined" crossorigin="anonymous" />
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'menuFacil/css/style.css' %}" rel="stylesheet" />
+    <!-- responsive style -->
+    <link href="{% static 'menuFacil/css/responsive.css' %}" rel="stylesheet" />
+    
+    {% block head %}
+    {% endblock %}
+  </head>
+  
+  <body>
+    
+
+      {% block topbar %}
+        <div class="hero_area">
+          <!-- header section strats -->
+          <header class="header_section">
+            <div class="container-fluid">
+              <nav class="navbar navbar-expand-lg custom_nav-container">
+                <a class="navbar-brand" href="{% url 'restaurant:index' %}">
+                  <span>
+                    MenuFácil
+                  </span>
+                </a>
+                <div class="" id="">
+                  {% if user.is_authenticated %}
+                    <div class="User_option">
+                      <a href="{% url 'account:profile' %}">
+                        <i class="fa fa-user-circle" aria-hidden="true"></i>
+                        <span>Account: {{ user.username }}</span>
+                      </a>
+                  {% else %}
+                    <div class="User_option">
+                      <a href="{% url 'account:login' %}">
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                        <span>Login</span>
+                      </a>
+                      <a href="{% url 'account:signup' %}">
+                        <i class="fa fa-sign-in" aria-hidden="true"></i>
+                        <span>Sign Up</span>
+                      </a>
+                  {%endif%}
+                    </div>
+                  <div class="custom_menu-btn">
+                    <button onclick="openNav()">
+                      <img src="{% static 'MenuFacil/images/menu.png'%}">
+                    </button>
+                  </div>
+                  <div id="myNav" class="overlay">
+                    <div class="overlay-content">
+                      <a href="{% url 'restaurant:index' %}">Home</a>
+                      {% if user.is_authenticated %}
+
+            {% if user.is_staff %}
+              <a href="{% url 'admin:index' %}">Admin</a>
+            {% endif %}
+
+                        <a href="{% url 'tab:history' %}">History</a>
+
+                      {% else %}
+                        <a href="{% url 'account:login' %}">Log In</a>
+                        <a href="{% url 'account:signup' %}">Sign Up</a>
+                      {% endif %}
+                      
+                      {% cart_length cart.id request.session request.user as cart_length %}
+                      <a href="{% url 'cart:details' %}">
+                        Cart {% if cart_length %}({{ cart_length }}){% endif %}
+                      </a>
+                      <a href="{% url 'tab:details' %}">Tab</a>
+                    </div>
+                  </div>
+                </div>
+              </nav>
+            </div>
+          </header>
+          {% block slider %}
+          {% endblock %}
+        </div>
+      {% endblock %}
+      <div class="messages">
+        {% if messages %}
+          {% for message in messages %}
+            <a{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</a>
+          {% endfor %}
+        {% endif %}
+      </div>  
+      {% block content %}
+      {% endblock %}
+   
+    <div class="footer_container">
+      <!-- info section -->
+      <section class="info_section ">
+        <div class="container">
+          <div class="contact_box">
+            <a href="">
+              <i class="fa fa-map-marker" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa fa-phone" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa fa-envelope" aria-hidden="true"></i>
+            </a>
+          </div>
+          <div class="info_links">
+            <ul>
+              <li class="active">
+                <a href="{% url 'restaurant:index' %}">MenuFacil Home</a>
+              </li>
+            </ul>
+          </div>
+          <div class="social_box">
+            <a href="">
+              <i class="fa fa-facebook" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa fa-twitter" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa fa-linkedin" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+      <!-- end info_section -->
+
+      <!-- footer section -->
+      <footer class="footer_section">
+        <div class="container">
+          <p>
+            &copy; <span id="displayYear"></span> All Rights Reserved By MenuFacil LTDA<br>
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- jQery -->
     <script src="{% static 'menuFacil/js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'menuFacil/js/bootstrap.js' %}"></script>
+    <!-- slick  slider -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.js"></script>
+    <!-- nice select -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js" integrity="sha256-Zr3vByTlMGQhvMfgkQ5BtWRSKBGa2QlspKYJnkjZTmo=" crossorigin="anonymous"></script>
+    <script src="{% static 'menuFacil/js/custom.js' %}"></script>
     
     <script>
       function SendPost(csrf, url, data, success, error) {
@@ -29,52 +187,5 @@
         });
       }
     </script>
-    
-    {% block head %}
-    {% endblock %}
-  </head>
-
-  <body style = "margin:0">
-
-    <main>
-      {% block topbar %}
-        <div class="topnav">
-          <a class="active" href="{% url 'restaurant:index' %}">Home</a>
-
-          {% if user.is_authenticated %}
-
-            {% if user.is_staff %}
-              <a href="{% url 'admin:index' %}">Admin</a>
-            {% endif %}
-
-            <a href="{% url 'account:profile' %}">Account: {{ user.username }}</a>
-            <a href="{% url 'tab:history' %}">History</a>
-
-          {% else %}
-            <a href="{% url 'account:login' %}">Log In</a>
-            <a href="{% url 'account:signup' %}">Sign Up</a>
-          {% endif %}
-          
-          {% cart_length cart.id request.session request.user as cart_length %}
-          <a href="{% url 'cart:details' %}">
-            Cart {% if cart_length %}({{ cart_length }}){% endif %}
-          </a>
-          <a href="{% url 'tab:details' %}">Tab</a>
-        </div>
-
-
-        <div class="messages">
-          {% if messages %}
-            {% for message in messages %}
-              <a{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</a>
-            {% endfor %}
-          {% endif %}
-        </div>
-      {% endblock %}
-
-
-      {% block content %}
-      {% endblock %}
-    </main>
   </body>
 </html>

@@ -6,14 +6,19 @@
 {% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="{% static 'restaurant/css/detail.css' %}" />
+<link rel="stylesheet" href="{% static 'restaurant/css/detail.css' %}" />
 {% endblock %}
 
 {% block content %}
-  <div class="menu">
-    <h1 class="texto">{{ restaurant.name }}</h1>
-    <h2 class="texto">{{ restaurant.message }}</h2>
-    <div class="menus">
+<body class="sub_page">
+  
+
+  <div class="menu" style="padding-bottom: 15vh;">
+    <div class="heading_container heading_center" style="padding-top: 2vh; padding-bottom: 5vh">
+      <h1 class="texto">{{ restaurant.name }}</h1>
+      <h2 class="texto">{{ restaurant.message }}</h2>
+    </div>
+    <div class="menus" style="padding-bottom: 50px;">
       {% csrf_token %}
       <script>
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -21,11 +26,11 @@
       </script>
       {% for menu in restaurant.menu_set.all %}
         <section class="menu-item">
-          <h3>{{ menu.name }}</h3>
+          <h2>{{ menu.name }}</h2>
           {% for food in menu.food_set.all %}
-            <div class="container">
+            <div class="container-food" data-food-id="{{ food.id }}" data-restaurant-id="{{ restaurant.id }}">
               {% if not food.hidden %}
-                <a id="food{{ forloop.counter }}">
+                <a>
                   {% if food.photo %}
                     <img src="{{ food.photo.url }}" alt="{{ food.name }}" />
                   {% endif %}
@@ -33,20 +38,31 @@
                   <p><small>{{ food.description }}</small></p>
                 </a>
                 <script>
-                  document.getElementById("food{{ forloop.counter }}").onclick = function () {
-                    SendPost(
-                      csrftoken,
-                      addURL,
-                      { food: "{{ food.id }}", restaurant: "{{ restaurant.id }}"},
-                      function (data, textStatus, jqXHR) {
-                        location.reload()
-                      },
-                      function (jqXHR, textStatus, errorThrown) {
-                        console.log(errorThrown)
-                        location.reload()
-                      }
-                    )
-                  }
+                  window.onload = function() {
+                    
+                    
+                    const foodElements = document.querySelectorAll('.container-food');
+                
+                    foodElements.forEach(function(foodElement) {
+                      foodElement.addEventListener('click', function() {
+                        const foodId = this.dataset.foodId;
+                        const restaurantId = this.dataset.restaurantId;
+                
+                        SendPost(
+                          csrftoken,
+                          addURL,
+                          { food: foodId, restaurant: restaurantId },
+                          function (data, textStatus, jqXHR) {
+                            location.reload();
+                          },
+                          function (jqXHR, textStatus, errorThrown) {
+                            console.log(errorThrown);
+                            location.reload();
+                          }
+                        );
+                      });
+                    });
+                  };
                 </script>
               {% endif %}
             </div>
@@ -55,4 +71,6 @@
       {% endfor %}
     </div>
   </div>
+ 
+</body>
 {% endblock %}
