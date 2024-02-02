@@ -6,26 +6,32 @@
 {% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="{% static 'account/css/style.css' %}" />
 {% endblock %}
 
 {% block content %}
-  <div class="container">
-    <h1>Account</h1>
+<body class="sub_page">
+    <section class="recipe_section layout_padding-top">
+        <div class="container">
+          <div class="heading_container heading_center" >
+            <h1>Account</h1>
+            <p class="greeting">Hi {{ user.username }}!</p>
+            <div class="form-row " style="display: flex; flex-direction: column">
+              <div class="btn-box" >
+                <a href="{% url 'account:password_change' %}" >Change Password</a>
+              </div>
 
-    <p class="greeting">Hi {{ user.username }}!</p>
+              <div class="btn-box" >
+                  {% csrf_token %}
+                    <a href="{% url 'account:logout' %}">Log out</a>
+              </div>
+              <div class="btn-box">
+                <a href="{% url 'account:delete' request.user.pk %}">Delete your account</a>
+              </div>   
+            </div>       
+          </div>
+        </div>
+    </section> 
 
-    <div class="button">
-      <a href="{% url 'account:password_change' %}">Change Password</a>
-    </div>
-
-    <div class="button">
-      <form id="logout-form" method="post" action="{% url 'account:logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="button">Log out</button>
-      </form>
-    </div>
-
-    <small class= "button"><a href="{% url 'account:delete' request.user.pk %}">Delete your account</a></small>
-  </div>
+</body>
+  
 {% endblock %}

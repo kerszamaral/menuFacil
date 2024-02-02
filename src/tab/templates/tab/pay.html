@@ -10,8 +10,11 @@
 
 
 {% block content%}
+<body class="sub_page">
+  
+
 <div>
-  <div class="col-sm-12">
+  <div class="container" style="display: flex; flex-direction: column; width: 1000px">
     <video id="preview" class="camera_scan"></video>
   </div>
   {% csrf_token %}
@@ -63,7 +66,8 @@
     });
   </script>
 
-  <div class="camera-buttons" data-toggle="buttons" id="result">
+  <div class="camera-buttons container" data-toggle="buttons" id="result" style="display: flex; flex-direction: column; width: 200px; padding: 10px">
   </div>
 </div>
+</body>
 {% endblock %}

@@ -6,11 +6,10 @@
 {% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="{% static 'account/css/style.css' %}" />
 {% endblock %}
 
 {% block content %}
-  <div class="container">
+  <!-- <div class="container">
     <div class="button-danger">
     <form method="post">
       {% csrf_token %}
@@ -18,5 +17,25 @@
       <button type="submit" class="button-danger">Delete</button>
     </form>
     </div>
-  </div>
+  </div> -->
+
+  <body class="sub_page" style="min-height: 100vh; display: flex; flex-direction: column">
+    <section class="recipe_section layout_padding-top">
+        <div class="container">
+          <div class="heading_container heading_center" >
+            <p class="greeting">{{ user.username }}</p>
+            <div class="form-row " style="display: flex; flex-direction: column; gap: 12px">
+              <div class="btn-box" >
+                <form method="post">
+                  {% csrf_token %}
+                  <p>Are you sure you want to delete the account?</p>
+                  <button type="submit" class="button-danger">Delete</button>
+                </form>
+              </div>
+            </div>       
+          </div>
+        </div>
+    </section> 
+
+</body>
 {% endblock %}

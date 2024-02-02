@@ -11,7 +11,9 @@
 {% endblock %}
 
 {% block content %}
-  <div class="comanda">
+<body class="sub_page">
+
+  <div class="comanda" style="padding-bottom: 50vh;">
     <h1>Your Tab</h1>
     {% if orders %}
       {% csrf_token %}
@@ -35,7 +37,7 @@
           <p>Price: {{ order.get_total_price|floatformat:2 }}</p>
         </button>
         <div class="accordion-content">
-          <div class="container">
+          <div class="container-tab">
             <div class="details">
               <table>
                 <tr>
@@ -132,4 +134,5 @@
       }
     }
   </script>
+</body>
 {% endblock %}

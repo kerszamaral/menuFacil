@@ -11,17 +11,23 @@
 {% endblock %}
 
 {% block content %}
+<body class="sub_page">
+  
+
   {% load crispy_forms_tags %}
 
   <!-- Register -->
   <div class="container py-5">
-    <h1 class="register">Register</h1>
+    <div class="heading_container heading_center" >
+      <h1 class="register" style="padding-bottom: 5vh;">Register</h1>
+    </div>
     <div class="form">
       <form method="POST">
         {% csrf_token %}
         {{ register_form|crispy }}
-        <button class="btn btn-primary" type="submit">Register</button>
+        <button class="btn btn-primary container" type="submit">Register</button>
       </form>
     </div>
   </div>
+</body>
 {% endblock %}

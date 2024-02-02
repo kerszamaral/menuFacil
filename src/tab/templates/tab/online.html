@@ -10,7 +10,9 @@
 {% endblock %}
 
 {% block content %}
+<body class="sub_page">
 {% load crispy_forms_tags %}
+<div class="container" style="padding: 10vh">
   <div class="form">
     <form method="POST">
       {% csrf_token %}
@@ -18,4 +20,6 @@
       <button type="submit" class="btn btn-primary">Pay</button>
     </form>
   </div>
+</div>
+</body>
 {% endblock %}
