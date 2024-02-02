@@ -95,9 +95,10 @@
             function (error) {
               if (error.status == 412) {
                 window.location.href = errorURL
+              } else {
+                console.log(error)
+                location.reload()
               }
-              location.reload()
-              console.log(error)
             }
           )
         }
