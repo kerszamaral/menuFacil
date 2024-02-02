@@ -2,13 +2,15 @@ import io
 from typing import Any
 from uuid import UUID
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.http import FileResponse
 from django.template.loader import get_template
+from django.views.decorators.http import require_POST
 from xhtml2pdf import pisa
 
+from menuFacil.validation import contains
 from .models import Restaurant
 
 # Create your views here.
@@ -40,3 +42,12 @@ def sales(request: HttpRequest, restaurant_id: UUID):
     restaurant = Restaurant.objects.get(pk=restaurant_id)
     html = get_template('restaurant/sales.html').render({'restaurant': restaurant})
     return create_pdf(html, f"{restaurant.name}-sales")
+
+@require_POST
+def search(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['search']):
+        return JsonResponse({"success": False}, status=400)
+    
+    request.session['search'] = request.POST['search']
+
+    return JsonResponse({"success": True}, status=200)

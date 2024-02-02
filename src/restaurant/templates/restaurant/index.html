@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
+{% load rest_tags %}
 
 {% block title %}Restaurants{% endblock %}
 
 {% block head %}
+{% csrf_token %}
+<script>
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+</script>
 {% endblock %}
 
 {% block slider%}
@@ -28,19 +33,34 @@
                         <form>
                             <div class="form-row ">
                             <div class="form-group col-lg-5">
-                                <input type="text" class="form-control" id="inputHotel" placeholder="Restaurant Name">
+                                <input type="text" class="form-control" id="inputName" placeholder="Restaurant Name" value='{{request.session|get_item:"search"}}' autocomplete="off">
                             </div>
-                            <div class="form-group col-lg-3">
-                                <input type="text" class="form-control" id="inputLocation" placeholder="All Locations">
-                                <span class="location_icon">
-                                <i class="fa fa-map-marker" aria-hidden="true"></i>
-                                </span>
-                            </div>
+                      
                             <div class="form-group col-lg-3">
                                 <div class="btn-box">
-                                <button type="submit" class="btn ">Search</button>
+                                <button type="submit" class="btn " id="search">Search</button>
                                 </div>
                             </div>
+                            <script>
+                              const URL = "{% url 'restaurant:search' %}"
+
+                              document.getElementById('search').onclick = function () {
+                                name = document.getElementById('inputName').value
+                                SendPost(
+                                  csrftoken,
+                                  URL,
+                                  {
+                                    search: name,
+                                  },
+                                  function (response) {
+                                    location.reload()
+                                  },
+                                  function (error) {
+                                    console.log(error)
+                                  }
+                                )
+                              }
+                            </script>
                             </div>
                         </form>
                         </div>
@@ -51,24 +71,28 @@
             </div>
             </div>
             <div class="slider_container">
-                {% if restaurant_list %}
-                {% for restaurant in restaurant_list %}
-                <section class="item">
-                    <div class="img-box">
-                        <a href="{% url 'restaurant:detail' restaurant.id %}" class="cart">
-                            {% if restaurant.logo %}
-                                <img src="{{ restaurant.logo.url }}" alt="{{ restaurant.name }}" href="{% url 'restaurant:detail' restaurant.id %}" >      
-                            {% endif %}
-                        </a>
-                    </div>
-                    <div class="detail-box"></div>
-                </section>
-                {% endfor %}
-                {% else %}
-                <div class="container heading_center">
-                  <p style="padding: 10vh;">No restaurants<br>are available.</p>
-                </div>
-                {% endif %}
+              {% with search=request.session|get_item:"search" %}
+                {% with rests=restaurant_list|filter_name:search %}
+                  {% if rests %}
+                  {% for restaurant in rests %}
+                  <section class="item">
+                      <div class="img-box">
+                          <a href="{% url 'restaurant:detail' restaurant.id %}" class="cart">
+                              {% if restaurant.logo %}
+                                  <img src="{{ restaurant.logo.url }}" alt="{{ restaurant.name }}" href="{% url 'restaurant:detail' restaurant.id %}" >      
+                              {% endif %}
+                          </a>
+                      </div>
+                      <div class="detail-box"></div>
+                  </section>
+                  {% endfor %}
+                  {% else %}
+                  <div class="container heading_center">
+                    <p style="padding: 10vh;">No restaurants<br>are available.</p>
+                  </div>
+                  {% endif %}
+                {% endwith %}
+              {% endwith %}
         
             </div>
         </section>

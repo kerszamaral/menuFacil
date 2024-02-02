@@ -85,9 +85,9 @@
                       <a href="{% url 'restaurant:index' %}">Home</a>
                       {% if user.is_authenticated %}
 
-            {% if user.is_staff %}
-              <a href="{% url 'admin:index' %}">Admin</a>
-            {% endif %}
+                        {% if user.is_staff %}
+                          <a href="{% url 'admin:index' %}">Admin</a>
+                        {% endif %}
 
                         <a href="{% url 'tab:history' %}">History</a>
 
@@ -107,17 +107,20 @@
               </nav>
             </div>
           </header>
+
+          <div class="messages">
+            {% if messages %}
+              {% for message in messages %}
+                <a{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</a>
+              {% endfor %}
+            {% endif %}
+          </div> 
+
           {% block slider %}
           {% endblock %}
         </div>
       {% endblock %}
-      <div class="messages">
-        {% if messages %}
-          {% for message in messages %}
-            <a{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</a>
-          {% endfor %}
-        {% endif %}
-      </div>  
+       
       {% block content %}
       {% endblock %}
    
