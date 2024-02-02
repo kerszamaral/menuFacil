@@ -6,6 +6,7 @@ from restaurant.models import Food, Restaurant
 
 from menuFacil.validation import contains
 
+from tab.views import TAB_KEY
 from item.models import Item
 from .models import Cart, CART_KEY
 
@@ -98,6 +99,7 @@ def remove(request: HttpRequest) -> HttpResponse:
 def details(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
         request.session[CART_KEY] = str(request.user.cart.id) # type: ignore
+        request.session[TAB_KEY] = str(request.user.tab.id) # type: ignore
 
     (cart, created)= Cart.objects.get_or_create(id=request.session.get(CART_KEY, None),
                         defaults={'client': request.user if request.user.is_authenticated else None}
