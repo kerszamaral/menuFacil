@@ -13,4 +13,4 @@ fi &&
 echo &&
 echo "The server is running at http://$ip_address:8000" &&
 echo &&
-python manage.py runserver_plus --cert localhost 0.0.0.0:8000
+python manage.py runserver 0.0.0.0:8000
