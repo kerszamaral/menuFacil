@@ -1,5 +1,6 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -63,8 +64,7 @@ def pay_online(request: HttpRequest) -> HttpResponse:
         form = PaymentForm(request.POST)
         if form.is_valid():
             if TAB_KEY in request.session.keys():
-                r = payed(request, tab_id=request.session[TAB_KEY])
-                if r.status_code == 200:
+                if tab_has_been_payed(request.session[TAB_KEY]):
                     return redirect("tab:payed")
         else:
             for error in form.errors:
@@ -83,26 +83,43 @@ def history(request: HttpRequest) -> HttpResponse:
 
 @staff_member_required
 def confirm_payment(request: HttpRequest) -> HttpResponse:
-    return render(request, 'tab/pay.html')
+    return render(request, 'tab/confirm.html')
 
-@require_http_methods(["GET", "POST"])
-def payed(request: HttpRequest, tab_id: str | None = None) -> HttpResponse:
-    if request.method == "GET":
-        if TAB_KEY not in request.session.keys():
-            messages.error(request, "Error in getting your Tab")
-            return redirect("tab:details")
-        if Tab.objects.get(id=request.session[TAB_KEY]).order.count() == 0:
-            messages.success(request, "Tab paid successfully")
-            if not request.user.is_authenticated:
-                request.session.pop(TAB_KEY)
-            return redirect('home')
-        messages.error(request, "Tab hasn't been paid yet")
+@require_http_methods(["GET"])
+def remove_tab(request: HttpRequest) -> HttpResponse:
+    if TAB_KEY not in request.session.keys():
+        messages.error(request, "Error in getting your Tab")
         return redirect("tab:details")
 
-    if tab_id is None and not contains(request.POST, ['tab']):
-        return JsonResponse({"success": False}, status=400)
+    if Tab.objects.get(id=request.session[TAB_KEY]).order.count() != 0:
+        messages.error(request, "Your tab hasn't been paid yet")
+        return redirect("tab:details")
 
-    tab = get_object_or_404(Tab, id=tab_id or request.POST['tab'])
+    if request.user.is_authenticated:
+        messages.error(request, "You can't remove a tab if you are logged in")
+        return redirect("tab:details")
+
+    messages.success(request, "Tab Removed Successfully")
+    request.session.pop(TAB_KEY)
+    return redirect('home')
+
+
+@require_http_methods(["GET"])
+def payed(request: HttpRequest) -> HttpResponse:
+    if TAB_KEY not in request.session.keys():
+        messages.error(request, "Error in getting your Tab")
+        return redirect("tab:details")
+    if Tab.objects.get(id=request.session[TAB_KEY]).order.count() == 0:
+        messages.success(request, "Tab paid successfully")
+        if not request.user.is_authenticated:
+            request.session.pop(TAB_KEY)
+        return redirect('home')
+    messages.error(request, "Tab hasn't been paid yet")
+    return redirect("tab:details")
+
+
+def tab_has_been_payed(tab_id: str) -> bool:
+    tab = get_object_or_404(Tab, id=tab_id)
 
     new_tab: HistoricTab | None
     if tab.client is None:
@@ -120,4 +137,16 @@ def payed(request: HttpRequest, tab_id: str | None = None) -> HttpResponse:
         order.save()
 
     tab.save()
-    return JsonResponse({"success": True}, status=200)
+    return True
+
+@staff_member_required
+@require_http_methods(["POST"])
+def get_tab_page(request: HttpRequest) -> HttpResponse:
+    if not contains(request.POST, ['tab']) or \
+       not valid_uuid(request.POST['tab']) or \
+       not Tab.objects.filter(id=request.POST['tab']).exists():
+        return JsonResponse({"success": False}, status=400)
+
+    url = reverse("admin:tab_tab_change", args=[request.POST['tab']])
+
+    return JsonResponse({"success": True, "redirect": url}, status=200)

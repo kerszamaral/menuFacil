@@ -18,15 +18,13 @@
   <script type="text/javascript">
     var scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5, mirror: false });
     
-    const URL = "{% url 'tab:payed' %}";
-    const redirectURL = "{% url 'home' %}";
+    const URL = "{% url 'tab:get_page' %}";
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     scanner.addListener('scan', function(content){
       SendPost(csrftoken, URL, {'tab': content},
         function(data, textStatus, jqXHR) {
-            alert('Tab has been payed!');
-            window.location.href=redirectURL;
+          window.location.href=data['redirect'];
         },
         function (jqXHR, textStatus, errorThrown) {
             alert('Invalid QRCode!');

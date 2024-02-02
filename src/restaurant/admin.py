@@ -10,12 +10,14 @@ from guardian.admin import GuardedModelAdmin
 from guardian.shortcuts import get_objects_for_user
 from guardian.core import ObjectPermissionChecker
 from django_object_actions import DjangoObjectActions
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 
 from order.models import Order
 from item.models import Item
 from tab.models import Tab
 from .models import Promotion, Restaurant, Menu, Food
+from tab.views import tab_has_been_payed
 
 class LockedModel(object):
     def has_add_permission(self, request, obj=None) -> bool: # pylint: disable=unused-argument
@@ -307,3 +309,61 @@ class RestaurantAdmin(DjangoObjectActions, PermissionCheckModelAdmin):
             actions.remove('generate_sales_report')
 
         return actions
+    
+class TabOrdersInline(GenericTabularInline):
+    model = Order
+    ct_fk_field = "tab_id"
+    ct_field = "tab_type"
+    extra = 0
+    max_num = 0
+    can_delete = False
+    readonly_fields = ('status', 'items', 'total_price')
+
+    def total_price(self, instance):
+        return instance.get_total_price()
+
+    def items(self, instance):
+        item_string = ""
+        for item in instance.item_set.all():
+            item_string += f"{item.food.name} x {item.quantity}\n"
+        return item_string
+
+@admin.register(Tab)
+class TabAdmin(DjangoObjectActions, HiddenModel, admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['restaurant_name', 'client_name', 'total_price']}),
+    ]
+    readonly_fields = ('restaurant_name', 'client_name', 'total_price')
+    inlines = [TabOrdersInline]
+
+    change_actions = ['confirm_payment']
+    
+    def restaurant_name(self, instance):
+        return instance.restaurant.name
+    
+    def client_name(self, instance):
+        return instance.client.username
+    
+    def total_price(self, instance):
+        return instance.get_total_price()
+
+    def confirm_payment(self, request, obj):
+        if tab_has_been_payed(str(obj.id)):
+            self.message_user(request, "Order paid")
+        else:
+            self.message_user(request, "Error paying order")
+            
+    def get_model_objects(self, request: HttpRequest, action=None, klass=None):
+        opts = self.opts
+        actions = [action] if action else ['view']
+        klass = klass or opts.model
+        model_name = klass._meta.model_name
+        return get_objects_for_user(user=request.user,
+                                    perms=[f'{perm}_{model_name}' for perm in actions],
+                                    klass=klass, any_perm=True)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(restaurant__in=self.get_model_objects(request, action='view', klass=Restaurant))
