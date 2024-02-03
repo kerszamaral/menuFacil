@@ -137,6 +137,10 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, GuardedModelAdmi
                                     klass=klass, any_perm=True)
 
     def approve_cancellation(self, request, obj):
+        if not self.get_model_objects(request, action='delete').exists():
+            self.message_user(request, "You don't have permission to cancel this order")
+            return
+
         if obj.pending_cancellation and obj.status in [Order.StatusType.MADE, Order.StatusType.IN_PROGRESS]:
             obj.status = Order.StatusType.CANCELLED
             obj.save()
@@ -161,30 +165,6 @@ class OrderAdmin(DjangoObjectActions, HiddenModel, LockedModel, GuardedModelAdmi
             self.message_user(request, "Couldn't change order status")
 
     change_actions = ['approve_cancellation', 'in_progress', 'delivered']
-
-    def get_change_actions(self, request, object_id, form_url):
-        actions: list[str] = super().get_change_actions(request, object_id, form_url)
-
-        obj = self.get_object(request, object_id)
-
-        if obj is None:
-            return []
-
-        can_approve_cancellation = self.get_model_objects(request, action='delete').exists()
-        is_pending_cancellation = obj.pending_cancellation and obj.status in [Order.StatusType.MADE, Order.StatusType.IN_PROGRESS]
-        should_appear = can_approve_cancellation and is_pending_cancellation
-        if not should_appear and contains(actions, 'approve_cancellation'):
-            actions.remove('approve_cancellation')
-
-        isnt_in_made = obj.status != Order.StatusType.MADE
-        if  isnt_in_made and contains(actions, 'in_progress'):
-            actions.remove('in_progress')
-
-        isnt_in_progress = obj.status != Order.StatusType.IN_PROGRESS
-        if isnt_in_progress and contains(actions, 'delivered'):
-            actions.remove('delivered')
-
-        return actions
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         qs = super().get_queryset(request)
@@ -278,10 +258,16 @@ class RestaurantAdmin(DjangoObjectActions, PermissionCheckModelAdmin):
     inlines = [MenuInline, PromotionInline, MakingOrdersInline, OrdersInline, TabInline]
 
     def create_tab(self, request: HttpRequest, obj):
+        if not self.get_model_objects(request, action='add', klass=Tab).exists():
+            self.message_user(request, "You don't have permission to create tabs")
+            return
         Tab.objects.create(restaurant=obj)
         messages.success(request, 'Tab created')
 
     def generate_sales_report(self, request: HttpRequest, obj):
+        if not self.get_model_objects(request, action='add', klass=Menu).exists():
+            self.message_user(request, "You don't have permission to see sales report")
+            return
         return redirect(reverse('restaurant:sales', args=[obj.pk]))
 
     def confirm_payment(self, request: HttpRequest, obj):
@@ -289,27 +275,13 @@ class RestaurantAdmin(DjangoObjectActions, PermissionCheckModelAdmin):
 
     # Needed because of bug in django-object-actions
     def object_permissions(self, request: HttpRequest, obj):
+        if not ObjectPermissionChecker(request.user).has_perm('delete_restaurant', obj):
+            self.message_user(request, "You don't have permission to change permissions")
+            return
+
         return redirect(reverse(f"admin:{obj._meta.app_label}_{obj._meta.model_name}_permissions",
                       args=[obj.pk] ))
 
-    def get_change_actions(self, request, object_id, form_url):
-        actions: list[str] = super(RestaurantAdmin, self).get_change_actions(request, object_id, form_url)
-
-        obj = self.get_object(request, object_id)
-        can_edit_obj_perm = ObjectPermissionChecker(request.user).has_perm('delete_restaurant', obj)
-        if not can_edit_obj_perm and contains(actions, 'object_permissions'):
-            actions.remove('object_permissions')
-
-        can_create_tab = self.get_model_objects(request, action='add', klass=Tab).exists()
-        if not can_create_tab and contains(actions, 'create_tab'):
-            actions.remove('create_tab')
-
-        can_generate_sales_report = self.get_model_objects(request, action='add', klass=Menu).exists()
-        if not can_generate_sales_report and contains(actions, 'generate_sales_report'):
-            actions.remove('generate_sales_report')
-
-        return actions
-    
 class TabOrdersInline(GenericTabularInline):
     model = Order
     ct_fk_field = "tab_id"
@@ -337,22 +309,25 @@ class TabAdmin(DjangoObjectActions, HiddenModel, admin.ModelAdmin):
     inlines = [TabOrdersInline]
 
     change_actions = ['confirm_payment']
-    
+
     def restaurant_name(self, instance):
         return instance.restaurant.name
-    
+
     def client_name(self, instance):
         return instance.client.username
-    
+
     def total_price(self, instance):
         return instance.get_total_price()
 
     def confirm_payment(self, request, obj):
+        if obj.order.count() == 0:
+            self.message_user(request, "The tab doesn't have any orders")
+            return
         if tab_has_been_payed(str(obj.id)):
             self.message_user(request, "Order paid")
         else:
             self.message_user(request, "Error paying order")
-            
+
     def get_model_objects(self, request: HttpRequest, action=None, klass=None):
         opts = self.opts
         actions = [action] if action else ['view']

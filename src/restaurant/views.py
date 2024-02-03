@@ -8,6 +8,7 @@ from django.views import generic
 from django.http import FileResponse
 from django.template.loader import get_template
 from django.views.decorators.http import require_POST
+from django.contrib.admin.views.decorators import staff_member_required
 from xhtml2pdf import pisa
 
 from menuFacil.validation import contains
@@ -34,10 +35,12 @@ def create_pdf(html, name: str) -> FileResponse:
         return FileResponse(buffer, as_attachment=True, filename= f"{name}.pdf")
     return FileResponse('Error Rendering PDF', status=400)
 
+@staff_member_required
 def get_qrcode(request: HttpRequest, tab_id: UUID) -> FileResponse:
     html = get_template('restaurant/qrcode.html').render({'tab_id': str(tab_id)})
     return create_pdf(html, f"{str(tab_id).split('-')[0]}-qrcode")
 
+@staff_member_required
 def sales(request: HttpRequest, restaurant_id: UUID):
     restaurant = Restaurant.objects.get(pk=restaurant_id)
     html = get_template('restaurant/sales.html').render({'restaurant': restaurant})
