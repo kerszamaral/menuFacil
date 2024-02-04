@@ -31,7 +31,7 @@ a {
 }
 
 .button a:hover {
-    background-color: #009879;
+    background-color: #4855fe;
     color: white;
 }
 
@@ -48,7 +48,7 @@ a {
 }
 
 .button button:hover {
-    background-color: #009879;
+    background-color: #4855fe;
     color: white;
 }
 
@@ -111,7 +111,7 @@ a {
 }
 
 .form button:hover {
-    background-color: #009879;
+    background-color: #4855fe;
     color: white;
 }
 
@@ -125,7 +125,7 @@ a {
 
 .form ul {
     border-radius: 12px;
-    border: 2px solid #009879;
+    border: 2px solid #4855fe;
 }
 
 .register {

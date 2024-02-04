@@ -18,7 +18,7 @@
 }
 
 .table thead tr {
-    background-color: #009879;
+    background-color: #4855fe;
     color: #ffffff;
     text-align: left;
 }
@@ -35,7 +35,7 @@
 }
 
 .table tbody tr:last-of-type {
-    border-bottom: 2px solid #009879;
+    border-bottom: 2px solid #4855fe;
 }
 
 .carrinho a{
@@ -48,6 +48,6 @@
 }
 
 .carrinho a:hover {
-    background-color: #009879;
+    background-color: #4855fe;
     color: white;
 }

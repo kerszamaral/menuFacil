@@ -73,7 +73,7 @@ button.accordion.is-open {
 }
 
 .container a:hover {
-    background-color: #009879;
+    background-color: #4855fe;
     color: white;
 }
 
@@ -90,7 +90,7 @@ button.accordion.is-open {
 }
 
 .details table tr td:first-child {
-    background-color: #009879;
+    background-color: #4855fe;
     color: #ffffff;
     text-align: right
 }
@@ -128,7 +128,7 @@ button.accordion.is-open {
 }
 
 .table thead tr {
-    background-color: #009879;
+    background-color: #4855fe;
     color: #ffffff;
     text-align: left;
 }
@@ -148,7 +148,7 @@ button.accordion.is-open {
 }
 
 .table tbody tr:last-of-type {
-    border-bottom: 2px solid #009879;
+    border-bottom: 2px solid #4855fe;
 }
 
 .button a {
@@ -163,6 +163,6 @@ button.accordion.is-open {
 }
 
 .button a:hover {
-    background-color: #009879;
+    background-color: #4855fe;
     color: white;
 }

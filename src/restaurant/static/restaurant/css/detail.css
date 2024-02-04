@@ -92,17 +92,33 @@
     border-radius: 12px;
     margin-top: 0px;
     margin-bottom: 0px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .container-food a:hover {
-    background-color: #009879;
+    background-color: #4855fe;
+}
+.menu-item :hover {
     color: white;
 }
+
 
 .container-food p {
     margin-top: 0px;
     margin-bottom: 0px;
     text-align: center;
+    max-width: 25vw;
+    text-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+    .container-food p {
+        max-width: 50vw;
+    }
 }
 
 .container-food img {
