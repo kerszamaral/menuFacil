@@ -17,7 +17,7 @@ from order.models import Order
 from item.models import Item
 from tab.models import Tab
 from .models import Promotion, Restaurant, Menu, Food
-from tab.views import tab_has_been_payed
+from tab.views import tab_has_been_paid
 
 class LockedModel(object):
     def has_add_permission(self, request, obj=None) -> bool: # pylint: disable=unused-argument
@@ -323,7 +323,7 @@ class TabAdmin(DjangoObjectActions, HiddenModel, admin.ModelAdmin):
         if obj.order.count() == 0:
             self.message_user(request, "The tab doesn't have any orders")
             return
-        if tab_has_been_payed(str(obj.id)):
+        if tab_has_been_paid(str(obj.id)):
             self.message_user(request, "Order paid")
         else:
             self.message_user(request, "Error paying order")

@@ -18,7 +18,7 @@
       <h1>Show This QRCode to the Cashier</h1>
       {% qr_from_text tab_id size="M" %}
       <div class="button">
-        <a href="{% url 'tab:payed' %}">Done</a>
+        <a href="{% url 'tab:paid' %}">Done</a>
       </div>
     {% else %}
       <h1>There is no tab to pay</h1>

@@ -64,8 +64,8 @@ def pay_online(request: HttpRequest) -> HttpResponse:
         form = PaymentForm(request.POST)
         if form.is_valid():
             if TAB_KEY in request.session.keys():
-                if tab_has_been_payed(request.session[TAB_KEY]):
-                    return redirect("tab:payed")
+                if tab_has_been_paid(request.session[TAB_KEY]):
+                    return redirect("tab:paid")
         else:
             for error in form.errors:
                 print(error)
@@ -105,7 +105,7 @@ def remove_tab(request: HttpRequest) -> HttpResponse:
 
 
 @require_http_methods(["GET"])
-def payed(request: HttpRequest) -> HttpResponse:
+def paid(request: HttpRequest) -> HttpResponse:
     if TAB_KEY not in request.session.keys():
         messages.error(request, "Error in getting your Tab")
         return redirect("tab:details")
@@ -118,7 +118,7 @@ def payed(request: HttpRequest) -> HttpResponse:
     return redirect("tab:details")
 
 
-def tab_has_been_payed(tab_id: str) -> bool:
+def tab_has_been_paid(tab_id: str) -> bool:
     tab = get_object_or_404(Tab, id=tab_id)
 
     new_tab: HistoricTab | None
